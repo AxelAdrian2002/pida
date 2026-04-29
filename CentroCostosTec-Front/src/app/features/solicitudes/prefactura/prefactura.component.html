@@ -1,0 +1,185 @@
+<div class="row mt-5 prefactura-module" *ngIf="pedido; else sinDataTpl">
+  <div class="col-md-12">
+    <div class="row justify-content-center">
+      <div class="col-md-10">
+        <div class="card prefactura-shell">
+          <ng-container *ngIf="(pedido?.pedidoid || 0) > 0">
+            <div class="row justify-content-center mt-2" *ngIf="(pedido?.referenciasBnacarias || []).length > 0">
+              <div class="col-md-7">
+                <div class="h6 text-center">Referencias para deposito y/o transferencias por pedido</div>
+                <div class="justify-content-center">
+                  <table class="table table-borderless table-secondary">
+                    <tbody class="justify-content-center">
+                      <tr *ngFor="let item of (pedido?.referenciasBnacarias || [])" class="text-left ref">
+                        <td class="ref">{{ item?.banco }}</td>
+                        <td class="ref">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                        <td class="ref">{{ item?.referencia }}</td>
+                        <td class="ref">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                        <td class="ref">{{ item?.detallePago }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+
+          <div class="card-header prefactura-header">
+            <div class="row">
+              <div class="col-md-4 col-sm-4 col-xs-12 text-left text-xs-left">
+                <ng-container *ngIf="(pedido?.pedidoid || 0) < 1; else pedidoBlock">
+                  <div class="header-label" *ngIf="pedido?.pedidoCliente"><strong>Recibo:</strong> {{ pedido?.prefactura?.prefacturaid || '-' }}</div>
+                </ng-container>
+                <ng-template #pedidoBlock>
+                  <div class="header-label"><strong>Pedido:</strong> {{ pedido?.pedidoid }}</div>
+                </ng-template>
+              </div>
+              <div class="col-md-4 col-sm-4 col-xs-12 text-center text-xs-left">
+                <strong>Cliente:</strong>
+                {{ pedido?.prefactura?.clienteid || pedido?.clienteId || pedido?.clienteid || '-' }}-
+                {{ pedido?.prefactura?.consignatarioid || pedido?.consignatarioId || pedido?.consignatarioid || '-' }} /
+                {{ pedido?.prefactura?.servicioid || 'DESP' }}
+              </div>
+              <div class="col-md-4 col-sm-4 col-xs-12 text-right text-xs-left">
+                <strong>Fecha:</strong> {{ (pedido?.prefactura?.fechacreacion || hoy) | date:'yyyy/MM/dd' }}
+              </div>
+            </div>
+          </div>
+
+          <div class="card-body bg-light">
+            <div class="row mb-2 mt-2 flex-column text-left text-dark">
+              <p><strong>Datos Fiscales:</strong></p>
+              <p><strong>Razon Social:</strong> {{ pedido?.prefactura?.datosFiscales?.razonsocial || '-' }}</p>
+              <p><strong>RFC:</strong> {{ pedido?.prefactura?.datosFiscales?.rfc || '-' }}</p>
+              <p>
+                <strong>Direccion:</strong>
+                {{ pedido?.prefactura?.datosFiscales?.calle || '-' }}, N.Int {{ pedido?.prefactura?.datosFiscales?.numerointerior || '-' }}
+                N.Ext {{ pedido?.prefactura?.datosFiscales?.numeroexterior || '-' }}, Col {{ pedido?.prefactura?.datosFiscales?.colonia || '-' }},
+                CP {{ pedido?.prefactura?.datosFiscales?.codigopostal || '-' }}, Ciudad {{ pedido?.prefactura?.datosFiscales?.ciudad || '-' }}
+              </p>
+            </div>
+
+            <div class="row">
+              <div class="col-sm-12">
+                <div class="table-responsive">
+                  <table class="table table-borderless table-light">
+                    <thead>
+                      <tr>
+                        <th>Desglose</th>
+                        <th>Producto</th>
+                        <th>Iva</th>
+                        <th>Valor Base</th>
+                        <th>Valor Iva</th>
+                        <th>Valor Facial</th>
+                        <th>Cobros Subtotal</th>
+                        <th>Cobros Iva</th>
+                        <th>Total Cobros</th>
+                        <th>Desglose Subtotal</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <ng-container *ngFor="let desglose of (pedido?.prefactura?.ltsDesglosePrefactura || [])">
+                        <tr class="table-secondary">
+                          <td>{{ desglose?.desgloseprefacturaid }}</td>
+                          <td>[{{ desglose?.productoid }} {{ desglose?.productonombre }}]</td>
+                          <td>{{ desglose?.valoriva }}%</td>
+                          <td>${{ desglose?.valorbase | number:'1.2-2' }}</td>
+                          <td>${{ desglose?.valorcuotaiva | number:'1.2-2' }}</td>
+                          <td>${{ desglose?.valorfacial | number:'1.2-2' }}</td>
+                          <td>${{ desglose?.cobrossubtotal | number:'1.2-2' }}</td>
+                          <td>${{ desglose?.cobroscuotaiva | number:'1.2-2' }}</td>
+                          <td>${{ desglose?.cobrostotal | number:'1.2-2' }}</td>
+                          <td>${{ ((desglose?.cobrostotal || 0) + (desglose?.valorfacial || 0)) | number:'1.2-2' }}</td>
+                        </tr>
+
+                        <tr class="table">
+                          <th>Cobros</th>
+                          <th>Descripcion</th>
+                          <th>Precio Unitario</th>
+                          <th>Cantidad</th>
+                          <th>Subtotal</th>
+                        </tr>
+                        <tr *ngFor="let detalle of (desglose?.ltsDetallePrectafura || [])" class="table">
+                          <td>{{ detalle?.tipoconceptoid }}{{ detalle?.conceptoid }}</td>
+                          <td>{{ detalle?.porconcepto }}</td>
+                          <td>${{ detalle?.preciounitario | number:'1.2-2' }}</td>
+                          <td>{{ detalle?.cantidad }}</td>
+                          <td>${{ detalle?.subtotal | number:'1.2-2' }}</td>
+                        </tr>
+                        <tr><td colspan="10" class="py-1"></td></tr>
+                      </ng-container>
+
+                      <tr *ngIf="(pedido?.prefactura?.ltsDesglosePrefactura || []).length === 0">
+                        <td colspan="10" class="text-center text-muted py-3">Sin desglose disponible para esta prefactura.</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="prefactura-content-pad">
+            <div *ngIf="pedido?.pedidoCliente" class="prefactura-total text-end mb-2">
+              <strong>Importe a Pagar:</strong>
+              ${{ resolverMontoPedido(pedido) | number:'1.2-2' }}
+            </div>
+
+            <ng-container *ngIf="(pedido?.pedidoid || 0) < 1">
+              <ng-container *ngIf="pedido?.pedidoCliente; else pedidoEmpleado">
+                <div class="h6 text-danger prefactura-notice mb-2">
+                  Revisa que los datos de esta prefactura sean correctos antes de confirmar la operación.
+                </div>
+                <div class="h6 text-danger prefactura-notice d-flex align-items-center gap-2 flex-wrap mb-0">
+                  <span>PARA CONCLUIR TU SOLICITUD DEBES ACEPTAR LA POLÍTICA INTERNA DE OPERACIÓN</span>
+                  <input name="condicion" type="checkbox" [(ngModel)]="condicionBandera">
+                </div>
+              </ng-container>
+              <ng-template #pedidoEmpleado>
+                <div class="h6 text-danger prefactura-notice mb-0">Pedido Generado. A peticion del cliente este pedido le sera descontado al saldo del empleado</div>
+              </ng-template>
+            </ng-container>
+          </div>
+
+          <div class="card-footer d-flex justify-content-between mt-3 prefactura-footer">
+            <ng-container *ngIf="(pedido?.pedidoid || 0) < 1; else pedidoButton">
+              <div class="ml-auto">
+                <button *ngIf="pedido?.pedidoCliente" class="btn btn-cancelar" (click)="cancelar()" [disabled]="loading">Cancelar</button>
+                <button *ngIf="pedido?.pedidoCliente" class="btn btn-aceptar" (click)="guardar()" [disabled]="loading || guardado">
+                  <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+                  {{ guardado ? 'Pedido guardado' : 'Aceptar' }}
+                </button>
+                <button *ngIf="!pedido?.pedidoCliente" class="btn btn-aceptar" (click)="aceptar()">Aceptar</button>
+              </div>
+            </ng-container>
+
+            <ng-template #pedidoButton>
+              <div class="container-fluid justify-content-center">
+                <div class="row justify-content-center">
+                  <div class="col-xl-4 col-lg-4 col-md-5 col-sm-6 mt-1">
+                    <button class="btn btn-imprimir col-lg-12" (click)="imprimir()">Imprimir</button>
+                  </div>
+                  <div class="col-xl-4 col-lg-4 col-md-5 col-sm-6 mt-1">
+                    <button class="btn btn-aceptar col-lg-12" (click)="aceptar()">Aceptar</button>
+                  </div>
+                </div>
+              </div>
+            </ng-template>
+          </div>
+
+          <div class="prefactura-content-pad pt-0">
+            <div class="alert alert-success mt-3 mb-0" *ngIf="exitoMsg">{{ exitoMsg }}</div>
+            <div class="alert alert-danger mt-3 mb-0" *ngIf="errorMsg">{{ errorMsg }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #sinDataTpl>
+  <div class="p-4">
+    <div class="alert alert-warning">No hay datos de prefactura para mostrar.</div>
+    <button class="btn btn-outline-primary" (click)="volver()">Volver</button>
+  </div>
+</ng-template>

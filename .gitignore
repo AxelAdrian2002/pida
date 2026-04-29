@@ -1,0 +1,26 @@
+﻿# Build outputs
+/target/
+/dist/
+/node_modules/
+/.angular/
+/build/
+/out/
+
+# Logs
+*.log
+/logs/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Env / secrets
+.env
+.env.*
+*.pem
+*.key
+
+# Misc
+coverage/

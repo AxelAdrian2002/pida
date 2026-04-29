@@ -1,0 +1,19 @@
+version: '3.9'
+services:
+  pida-db:
+    image: postgres:16
+    container_name: pida-db-local
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: pida_local
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pida_db_data:/var/lib/postgresql/data
+      - ./CentroCostosTec-API/src/main/resources/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./CentroCostosTec-API/src/main/resources/data.sql:/docker-entrypoint-initdb.d/02-data.sql:ro
+
+volumes:
+  pida_db_data:

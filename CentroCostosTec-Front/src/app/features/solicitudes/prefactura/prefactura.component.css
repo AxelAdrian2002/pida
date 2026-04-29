@@ -1,0 +1,179 @@
+p {
+  margin-top: 0 !important;
+}
+
+.prefactura-module {
+  --prefactura-primary: #0a7f8d;
+  --prefactura-accent: #0f5f89;
+  --prefactura-warn: #d94f2b;
+  --prefactura-border: #d5e3eb;
+  --prefactura-bg: #f4f8fb;
+}
+
+.prefactura-shell {
+  border: 2px solid var(--prefactura-border) !important;
+  border-radius: 14px !important;
+  overflow: hidden;
+  box-shadow: 0 10px 28px rgba(10, 33, 52, 0.12) !important;
+  background: linear-gradient(180deg, #ffffff 0%, var(--prefactura-bg) 100%);
+}
+
+.prefactura-header {
+  background: linear-gradient(120deg, #ecf6fa, #ddeef6) !important;
+  border-bottom: 1px solid var(--prefactura-border) !important;
+}
+
+.prefactura-header .header-label {
+  margin: 0 !important;
+  line-height: 1.5;
+  padding-top: 2px;
+}
+
+.prefactura-footer {
+  background: #eef5f8 !important;
+  border-top: 1px solid var(--prefactura-border) !important;
+  padding: 14px 18px !important;
+}
+
+.prefactura-content-pad {
+  padding: 12px 18px;
+}
+
+.prefactura-total {
+  background: #eaf3f9;
+  border: 1px solid var(--prefactura-border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: #15364f;
+}
+
+.prefactura-notice {
+  background: #fff3f1;
+  border: 1px solid #ffd6cf;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.ref {
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1.4;
+}
+
+li {
+  margin-top: -25px !important;
+  font-size: 12.5px !important;
+}
+
+.form {
+  background: rgb(255, 255, 255) !important;
+  color: black !important;
+}
+
+.form-control {
+  border: none !important;
+  background: none !important;
+  border-bottom: 2px solid #2196f3 !important;
+  border-radius: 0 !important;
+  color: rgb(102, 101, 101) !important;
+  font: bolder !important;
+  margin-bottom: 25px !important;
+}
+
+.form-control:focus {
+  border: none !important;
+  margin: 0 auto !important;
+  background: none !important;
+  box-shadow: none !important;
+  border-bottom: 2px solid #2196f3 !important;
+  color: #070707 !important;
+  font: bold !important;
+}
+
+.pago-amex-header {
+  background: #2196f3 !important;
+  border: rgb(151, 151, 151) solid 1.5px !important;
+  border-bottom: none !important;
+}
+
+.pago-amex-body {
+  background: #fbfbfb !important;
+  padding: 20px !important;
+  color: rgb(0, 0, 0) !important;
+  border: rgb(154, 154, 154) solid 1.5px !important;
+  border-top: none !important;
+}
+
+.amex-pagar-header {
+  background: #2196f3 !important;
+  border: rgb(151, 151, 151) solid 1.5px !important;
+  border-bottom: none !important;
+}
+
+.amex-pagar-body {
+  border: rgb(154, 154, 154) solid 1.5px !important;
+  border-top: none !important;
+}
+
+iframe {
+  width: 100% !important;
+  height: 700px !important;
+  border: none !important;
+}
+
+.btn-amex {
+  color: white !important;
+  background: #2196f3 !important;
+}
+
+.btn-amex:hover {
+  color: white !important;
+  background: #147dd3 !important;
+}
+
+.btn-info-prefactura,
+.btn-cancelar,
+.btn-aceptar,
+.btn-imprimir {
+  border-radius: 10px !important;
+  font-weight: 600;
+  border-width: 0 !important;
+  min-height: 40px;
+  padding: 8px 18px !important;
+}
+
+.btn-info-prefactura {
+  color: #fff !important;
+  background: var(--prefactura-primary) !important;
+}
+
+.btn-info-prefactura:hover {
+  background: #076e7a !important;
+}
+
+.btn-cancelar {
+  color: #fff !important;
+  background: #7f8d98 !important;
+}
+
+.btn-cancelar:hover {
+  background: #6f7d88 !important;
+}
+
+.btn-aceptar {
+  color: #fff !important;
+  background: var(--prefactura-accent) !important;
+}
+
+.btn-aceptar:hover {
+  background: #0a5277 !important;
+}
+
+.btn-imprimir {
+  color: #fff !important;
+  background: var(--prefactura-warn) !important;
+}
+
+.btn-imprimir:hover {
+  background: #bf4424 !important;
+}
