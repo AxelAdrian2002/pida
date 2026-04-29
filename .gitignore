@@ -1,14 +1,14 @@
 ﻿# Build outputs
-/target/
-/dist/
-/node_modules/
-/.angular/
-/build/
-/out/
+target/
+dist/
+node_modules/
+.angular/
+build/
+out/
 
 # Logs
 *.log
-/logs/
+logs/
 
 # IDE / OS
 .vscode/
@@ -24,3 +24,6 @@ Thumbs.db
 
 # Misc
 coverage/
+
+# VCS leftovers
+.svn/
