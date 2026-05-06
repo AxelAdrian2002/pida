@@ -1,8 +1,13 @@
 package com.efectivale.centrocostos.entity;
 
-import jakarta.persistence.*;
-import lombok.Data;
 import java.time.LocalDateTime;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import lombok.Data;
 
 @Data
 @Entity
@@ -25,7 +30,7 @@ public class Credencial {
     @Column(name = "empleadonombre", nullable = false, length = 200)
     private String nombreEmpleado;
 
-    @Transient
+    @Column(name = "estado", insertable = false, updatable = false)
     private String estado;
 
     @Transient

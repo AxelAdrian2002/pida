@@ -17,7 +17,9 @@ DROP VIEW IF EXISTS tarjeta CASCADE;
 DROP VIEW IF EXISTS parametros CASCADE;
 DROP VIEW IF EXISTS grupo_empleado_tec CASCADE;
 DROP VIEW IF EXISTS direccionesgrupo CASCADE;
+DROP VIEW IF EXISTS detalledirecciones CASCADE;
 DROP VIEW IF EXISTS tmemp CASCADE;
+DROP VIEW IF EXISTS tcope CASCADE;
 DROP VIEW IF EXISTS corpusuarios CASCADE;
 DROP VIEW IF EXISTS centrocostos CASCADE;
 DROP VIEW IF EXISTS corporativos CASCADE;
@@ -36,7 +38,9 @@ DROP TABLE IF EXISTS tarjeta CASCADE;
 DROP TABLE IF EXISTS parametros CASCADE;
 DROP TABLE IF EXISTS grupo_empleado_tec CASCADE;
 DROP TABLE IF EXISTS direccionesgrupo CASCADE;
+DROP TABLE IF EXISTS detalledirecciones CASCADE;
 DROP TABLE IF EXISTS tmemp CASCADE;
+DROP TABLE IF EXISTS tcope CASCADE;
 DROP TABLE IF EXISTS corpusuarios CASCADE;
 DROP TABLE IF EXISTS centrocostos CASCADE;
 DROP TABLE IF EXISTS corporativos CASCADE;
@@ -101,7 +105,24 @@ CREATE TABLE IF NOT EXISTS equipo_trabajo (
     clienteid BIGINT,
     consignatarioid BIGINT,
     fechacreacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    fechamodificacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (clienteid, consignatarioid, grupoid)
+);
+
+CREATE TABLE IF NOT EXISTS detalle_direccion_grupo (
+    iddirecciones BIGINT PRIMARY KEY REFERENCES equipo_trabajo(iddirecciones) ON DELETE CASCADE,
+    calle VARCHAR(150),
+    numero VARCHAR(30),
+    colonia VARCHAR(120),
+    codigopostal VARCHAR(10),
+    delegacion VARCHAR(120),
+    estado VARCHAR(120),
+    nombre VARCHAR(150),
+    telefono VARCHAR(40),
+    nombre2 VARCHAR(150),
+    telefono2 VARCHAR(40),
+    horario VARCHAR(120),
+    observacion VARCHAR(300)
 );
 
 CREATE TABLE IF NOT EXISTS equipo_colaborador (
@@ -258,8 +279,15 @@ CREATE OR REPLACE VIEW tmemp AS
 SELECT colaborador_id AS tidem, tnuec, tnoem, tappa, tapma, tmail, ttele, tnucl, tnuco, tgrup, tbist, tbife
 FROM colaborador;
 
+CREATE OR REPLACE VIEW tcope AS
+SELECT clienteid AS tnucl, consignatarioid AS tnuco
+FROM unidad_operativa;
+
 CREATE OR REPLACE VIEW direccionesgrupo AS
 SELECT * FROM equipo_trabajo;
+
+CREATE OR REPLACE VIEW detalledirecciones AS
+SELECT * FROM detalle_direccion_grupo;
 
 CREATE OR REPLACE VIEW grupo_empleado_tec AS
 SELECT * FROM equipo_colaborador;

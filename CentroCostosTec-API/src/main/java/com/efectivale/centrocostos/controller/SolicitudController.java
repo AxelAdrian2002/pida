@@ -67,7 +67,10 @@ public class SolicitudController {
     }
 
         @PostMapping(
-            value = "/Administracion_Pedidos/crear_pedido_dispersion/v1/crear_pedido_dispersion/guardarPedido",
+            value = {
+                "/solicitudes/apoyo-economico",
+                "/Administracion_Pedidos/crear_pedido_dispersion/v1/crear_pedido_dispersion/guardarPedido"
+            },
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
         )
     @PreAuthorize("hasAnyRole('ADMIN','CAPTURA')")
@@ -93,7 +96,10 @@ public class SolicitudController {
     }
 
         @PostMapping(
-            value = "/Administracion_Pedidos/crear_pedido_stock/v1/crear_pedido_stock/guardarPedido",
+            value = {
+                "/solicitudes/reposicion",
+                "/Administracion_Pedidos/crear_pedido_stock/v1/crear_pedido_stock/guardarPedido"
+            },
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
         )
     @PreAuthorize("hasAnyRole('ADMIN','CAPTURA')")
@@ -130,7 +136,10 @@ public class SolicitudController {
     }
 
         @PostMapping(
-            value = "/Administracion_Pedidos/crear_pedido_tarjeta/v1/crear_pedido_tarjeta/guardarPedido",
+            value = {
+                "/solicitudes/nueva-asignacion",
+                "/Administracion_Pedidos/crear_pedido_tarjeta/v1/crear_pedido_tarjeta/guardarPedido"
+            },
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
         )
     @PreAuthorize("hasAnyRole('ADMIN','CAPTURA')")
@@ -145,7 +154,10 @@ public class SolicitudController {
     }
 
         @PostMapping(
-            value = "/Administracion_Pedidos/crear_pedido_adicional/v1/crear_pedido_adicional/guardarPedido",
+            value = {
+                "/solicitudes/asignacion-adicional",
+                "/Administracion_Pedidos/crear_pedido_adicional/v1/crear_pedido_adicional/guardarPedido"
+            },
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
         )
     @PreAuthorize("hasAnyRole('ADMIN','CAPTURA')")

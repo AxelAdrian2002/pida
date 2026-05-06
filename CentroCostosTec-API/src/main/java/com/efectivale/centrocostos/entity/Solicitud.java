@@ -1,9 +1,10 @@
 package com.efectivale.centrocostos.entity;
 
-import lombok.Data;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import lombok.Data;
 
 @Data
 public class Solicitud {
@@ -32,11 +33,19 @@ public class Solicitud {
         return idSolicitud;
     }
 
+    public Long getIdPedido() {
+        return idSolicitud;
+    }
+
     public void setIdSolicitud(Long idSolicitud) {
         this.idSolicitud = idSolicitud;
     }
 
     public String getTipoSolicitud() {
+        return tipoSolicitud;
+    }
+
+    public String getTipoPedido() {
         return tipoSolicitud;
     }
 

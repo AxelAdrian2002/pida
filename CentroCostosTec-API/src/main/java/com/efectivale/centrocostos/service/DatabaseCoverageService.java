@@ -1,12 +1,14 @@
 package com.efectivale.centrocostos.service;
 
-import com.efectivale.centrocostos.dto.DatabaseStatusDto;
-import com.efectivale.centrocostos.dto.ModuloCoberturaDto;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import com.efectivale.centrocostos.dto.DatabaseStatusDto;
+import com.efectivale.centrocostos.dto.ModuloCoberturaDto;
 
 @Service
 public class DatabaseCoverageService {
@@ -15,6 +17,9 @@ public class DatabaseCoverageService {
     private final JdbcTemplate pddespensaJdbc;
     private final JdbcTemplate megadbpedidoJdbc;
     private final JdbcTemplate dbemisJdbc;
+
+    @Value("${spring.datasource.url}")
+    private String postgresUrl;
 
     public DatabaseCoverageService(
             @Qualifier("dbdespensaJdbc") JdbcTemplate dbdespensaJdbc,
@@ -29,10 +34,10 @@ public class DatabaseCoverageService {
 
     public List<DatabaseStatusDto> obtenerEstatusBases() {
         return List.of(
-            validarPostgres("dbdespensa", "PostgreSQL", "jdbc:postgresql://10.250.193.20:5433/dbdespensa", dbdespensaJdbc),
-                validarPostgres("pddespensa", "PostgreSQL", "jdbc:postgresql://10.250.193.20:5433/pddespensa", pddespensaJdbc),
-                validarPostgres("megadbpedido", "PostgreSQL", "jdbc:postgresql://10.250.193.20:5435/dbpedido", megadbpedidoJdbc),
-                validarInformix("dbemis", "Informix", "jdbc:informix-sqli://10.250.193.56:1543/dbemis:INFORMIXSERVER=emisnet", dbemisJdbc)
+            validarPostgres("dbdespensa", "PostgreSQL", postgresUrl, dbdespensaJdbc),
+                validarPostgres("pddespensa", "PostgreSQL", postgresUrl, pddespensaJdbc),
+                validarPostgres("megadbpedido", "PostgreSQL", postgresUrl, megadbpedidoJdbc),
+                validarPostgres("dbemis", "PostgreSQL", postgresUrl, dbemisJdbc)
         );
     }
 
@@ -69,15 +74,6 @@ public class DatabaseCoverageService {
     private DatabaseStatusDto validarPostgres(String base, String motor, String url, JdbcTemplate jdbc) {
         try {
             jdbc.queryForObject("SELECT CURRENT_TIMESTAMP", Object.class);
-            return new DatabaseStatusDto(base, motor, url, true, "Conexion OK");
-        } catch (Exception ex) {
-            return new DatabaseStatusDto(base, motor, url, false, limpiarMensaje(ex));
-        }
-    }
-
-    private DatabaseStatusDto validarInformix(String base, String motor, String url, JdbcTemplate jdbc) {
-        try {
-            jdbc.queryForObject("SELECT FIRST 1 tabname FROM systables", String.class);
             return new DatabaseStatusDto(base, motor, url, true, "Conexion OK");
         } catch (Exception ex) {
             return new DatabaseStatusDto(base, motor, url, false, limpiarMensaje(ex));

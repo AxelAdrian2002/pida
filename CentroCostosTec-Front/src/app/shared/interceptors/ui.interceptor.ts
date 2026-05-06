@@ -70,7 +70,7 @@ export const uiInterceptor: HttpInterceptorFn = (req, next) => {
         text: String(successMessage),
         confirmButtonText: 'Aceptar'
       }).then(() => {
-        if (moduleRoot && router.url !== moduleRoot) {
+        if (moduleRoot && moduleRoot !== '/solicitudes' && router.url !== moduleRoot) {
           void router.navigateByUrl(moduleRoot);
         }
       });

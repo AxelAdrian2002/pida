@@ -3,11 +3,20 @@ package com.efectivale.centrocostos.service;
 
 
 
-import com.efectivale.centrocostos.security.ContextProvider;
-import com.efectivale.centrocostos.dto.SolicitudDto;
-import com.efectivale.centrocostos.entity.Solicitud;
-import com.efectivale.centrocostos.entity.SolicitudDetalle;
-import lombok.RequiredArgsConstructor;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DataFormatter;
@@ -24,19 +33,13 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
+import com.efectivale.centrocostos.dto.SolicitudDto;
+import com.efectivale.centrocostos.entity.Solicitud;
+import com.efectivale.centrocostos.entity.SolicitudDetalle;
+import com.efectivale.centrocostos.security.ContextProvider;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -308,6 +311,7 @@ public class SolicitudService {
     private Solicitud guardarSolicitud(SolicitudDto dto, String tipo) {
         Long confirmacionId = siguienteConfirmacionId();
         LocalDateTime now = LocalDateTime.now();
+        String descripcionSolicitud = construirDescripcionSolicitud(tipo);
 
         Long clienteId = dto.getClienteId() != null ? dto.getClienteId() : 0L;
         Long consignatarioId = dto.getConsignatarioId() != null ? dto.getConsignatarioId() : 0L;
@@ -329,8 +333,8 @@ public class SolicitudService {
                 consignatarioId,
                 false,
                 -1,
-                "CentroCostos",
-                "N/D",
+                tipo,
+                descripcionSolicitud,
                 Timestamp.valueOf(now),
                 Timestamp.valueOf(now),
                 true
@@ -343,7 +347,7 @@ public class SolicitudService {
         solicitud.setEstado("PENDIENTE");
         solicitud.setMontoTotal(dto.getMontoTotal());
         solicitud.setIdUsuario(dto.getIdUsuario());
-        solicitud.setDescripcion("N/D");
+        solicitud.setDescripcion(descripcionSolicitud);
         solicitud.setReferencia(dto.getReferencia());
         solicitud.setFechaCreacion(now);
         solicitud.setClienteId(dto.getClienteId() != null ? dto.getClienteId() : 0);
@@ -367,6 +371,19 @@ public class SolicitudService {
             solicitud.setDetalles(detalles);
         }
         return solicitud;
+    }
+
+    private String construirDescripcionSolicitud(String tipo) {
+        if (tipo == null || tipo.isBlank()) {
+            return "Solicitud generada";
+        }
+        return switch (tipo) {
+            case "DISPERSION" -> "Solicitud de dispersion";
+            case "STOCK" -> "Solicitud de stock";
+            case "TARJETA" -> "Solicitud de nueva asignacion";
+            case "ADICIONAL" -> "Solicitud de asignacion adicional";
+            default -> "Solicitud de " + tipo.toLowerCase();
+        };
     }
 
     public Long registrarPrefactura(Long clienteId, Long consignatarioId, BigDecimal total, String servicioId) {

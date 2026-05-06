@@ -49,8 +49,8 @@ import { Pedido } from '../../models/models';
           </thead>
           <tbody>
             <tr *ngFor="let p of pedidos">
-              <td>{{ p.idPedido }}</td>
-              <td><span class="badge bg-secondary">{{ p.tipoPedido }}</span></td>
+              <td>{{ p.idPedido || p.idSolicitud || '-' }}</td>
+              <td><span class="badge bg-secondary">{{ p.tipoPedido || p.tipoSolicitud || '-' }}</span></td>
               <td>{{ p.descripcion }}</td>
               <td>{{ p.montoTotal | currency:'MXN' }}</td>
               <td><span class="badge" [ngClass]="getBadge(p.estado)">{{ p.estado }}</span></td>

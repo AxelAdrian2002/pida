@@ -1,11 +1,7 @@
 package com.efectivale.centrocostos.service;
 
-import com.efectivale.centrocostos.dto.EmpleadoDto;
-import com.efectivale.centrocostos.dto.GrupoDto;
+import java.util.function.Supplier;
 
-
-import com.efectivale.centrocostos.dto.SolicitudDto;
-import com.efectivale.centrocostos.dto.CredencialOperacionDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -13,7 +9,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.function.Supplier;
+import com.efectivale.centrocostos.dto.CredencialOperacionDto;
+import com.efectivale.centrocostos.dto.EmpleadoDto;
+import com.efectivale.centrocostos.dto.GrupoDto;
+import com.efectivale.centrocostos.dto.SolicitudDto;
 
 @Service
 public class MultiDbBusinessService {
@@ -43,38 +42,38 @@ public class MultiDbBusinessService {
     public void validarContextoSolicitud(SolicitudDto dto, String tipoSolicitud) {
         validarConexionMegadbpedido("Solicitud-" + tipoSolicitud);
         validarConexionPddespensa("Solicitud-" + tipoSolicitud);
-        validarContextoInformix(dto.getClienteId(), dto.getConsignatarioId(), "Solicitud-" + tipoSolicitud);
+        validarContextoOperativo(dto.getClienteId(), dto.getConsignatarioId(), "Solicitud-" + tipoSolicitud);
     }
 
     public void validarContextoCredencial(CredencialOperacionDto dto, String operacion) {
         validarConexionPddespensa("Credencial-" + operacion);
-        validarContextoInformix(dto.getClienteId(), dto.getConsignatarioId(), "Credencial-" + operacion);
+        validarContextoOperativo(dto.getClienteId(), dto.getConsignatarioId(), "Credencial-" + operacion);
     }
 
     public void validarContextoGrupo(GrupoDto dto, String operacion) {
         validarConexionPddespensa("Grupos-" + operacion);
         if (dto != null) {
-            validarContextoInformix(dto.getClienteId(), dto.getConsignatarioId(), "Grupos-" + operacion);
+            validarContextoOperativo(dto.getClienteId(), dto.getConsignatarioId(), "Grupos-" + operacion);
         }
     }
 
     public void validarContextoGrupo(Long clienteId, Long consignatarioId, String operacion) {
         validarConexionPddespensa("Grupos-" + operacion);
-        validarContextoInformix(clienteId, consignatarioId, "Grupos-" + operacion);
+        validarContextoOperativo(clienteId, consignatarioId, "Grupos-" + operacion);
     }
 
     public void validarContextoEmpleado(EmpleadoDto dto, String operacion) {
         validarConexionPddespensa("Empleados-" + operacion);
-        validarContextoInformix(dto.getClienteId(), dto.getConsignatarioId(), "Empleados-" + operacion);
+        validarContextoOperativo(dto.getClienteId(), dto.getConsignatarioId(), "Empleados-" + operacion);
         if (dto.getNumeroEmpleado() != null && !dto.getNumeroEmpleado().isBlank()) {
-            validarEmpleadoInformix(dto.getNumeroEmpleado());
+            validarEmpleadoOperativo(dto.getNumeroEmpleado());
         }
     }
 
     /**
      * ValidaciÃ³n de contexto login:
      *  - Verifica conectividad con dbdespensa (contiene corpusuarios, corporativos, centrocostos)
-     *  Nota: corpusuarios estÃ¡ en dbdespensa (PostgreSQL), NO en Informix.
+     *  Nota: corpusuarios estÃ¡ en dbdespensa (PostgreSQL).
      */
     public void validarContextoLogin(String username) {
         validarConexionDbdespensa("Auth-login");
@@ -97,15 +96,14 @@ public class MultiDbBusinessService {
     }
 
     /**
-     * Valida que cliente+consignatario existan en la tabla tcope de Informix (dbemis).
-     * Equivalente al join que hace el  con dbemis.
+     * Valida que cliente+consignatario existan en el catalogo operativo local en PostgreSQL.
      */
-    private void validarContextoInformix(Long clienteId, Long consignatarioId, String contexto) {
+    private void validarContextoOperativo(Long clienteId, Long consignatarioId, String contexto) {
         if (clienteId == null || consignatarioId == null) {
             return;
         }
         ejecutar("dbemis", contexto, () -> dbemisJdbc.queryForObject(
-                "SELECT FIRST 1 tnucl FROM tcope WHERE tnucl = ? AND tnuco = ?",
+                "SELECT clienteid FROM centrocostos WHERE clienteid = ? AND consignatarioid = ? LIMIT 1",
                 Long.class,
                 clienteId,
                 consignatarioId
@@ -113,11 +111,11 @@ public class MultiDbBusinessService {
     }
 
     /**
-     * Valida que el nÃºmero de empleado exista en tmemp de Informix (dbemis).
+     * Valida que el nÃºmero de empleado exista en tmemp local sobre PostgreSQL.
      */
-    private void validarEmpleadoInformix(String numeroEmpleado) {
+    private void validarEmpleadoOperativo(String numeroEmpleado) {
         ejecutar("dbemis", "Empleados-existe", () -> dbemisJdbc.queryForObject(
-                "SELECT FIRST 1 tnuec FROM tmemp WHERE tnuec = ?",
+                "SELECT tnuec FROM tmemp WHERE tnuec = ? LIMIT 1",
                 String.class,
                 numeroEmpleado
         ));
