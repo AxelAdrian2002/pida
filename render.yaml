@@ -8,7 +8,9 @@ services:
       - key: SERVER_PORT
         value: 10000
       - key: APP_CORS_ALLOWED_ORIGINS
-        value: https://TU_FIREBASE_PROJECT.web.app,https://TU_FIREBASE_PROJECT.firebaseapp.com,http://localhost:4200
+        value: https://centrocostos-tec-front.web.app,https://centrocostos-tec-front.firebaseapp.com,http://localhost:4200
+      - key: APP_ACCOUNT_VERIFY_URL
+        value: https://centrocostos-tec-front.web.app/verificar-cuenta
       - key: APP_JWT_SECRET
         sync: false
       - key: APP_DB_URL
