@@ -1,18 +1,21 @@
 package com.efectivale.centrocostos.service;
 
-import com.efectivale.centrocostos.dto.RegistroEmpresaDto;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Map;
+
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.mail.MailException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Map;
+import com.efectivale.centrocostos.dto.RegistroEmpresaDto;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
@@ -38,6 +41,7 @@ public class RegistroEmpresaService {
 
     @Transactional
     public Map<String, String> registrarEmpresa(RegistroEmpresaDto dto) {
+        try {
 
         // 1. Generar código único para la empresa (MAX 20 chars)
         String codigoBase = generarCodigo(dto.getRfc() != null ? dto.getRfc() : dto.getNombreEmpresa());
@@ -71,7 +75,12 @@ public class RegistroEmpresaService {
         );
 
         // 3. Insertar unidad_operativa principal con contexto operativo único por empresa
-        jdbc.execute("LOCK TABLE unidad_operativa IN EXCLUSIVE MODE");
+        try {
+            // En algunos entornos gestionados el LOCK explícito puede estar restringido.
+            jdbc.execute("LOCK TABLE unidad_operativa IN EXCLUSIVE MODE");
+        } catch (DataAccessException ex) {
+            log.warn("No se pudo aplicar LOCK TABLE unidad_operativa; se continua en modo compatible: {}", ex.getMostSpecificCause() != null ? ex.getMostSpecificCause().getMessage() : ex.getMessage());
+        }
         long siguienteClienteId = obtenerSiguienteClienteId();
         long siguienteConsignatarioId = obtenerSiguienteConsignatarioId();
         String codigoUnidad = codigoEmpresa + "-PRINC";
@@ -137,6 +146,11 @@ public class RegistroEmpresaService {
             "adminUsername", adminUsername,
             "mensaje", "Empresa registrada. Revisa tu correo con los datos de acceso."
         );
+        } catch (DataAccessException ex) {
+            String detalle = ex.getMostSpecificCause() != null ? ex.getMostSpecificCause().getMessage() : ex.getMessage();
+            log.error("Fallo SQL en registrarEmpresa: {}", detalle, ex);
+            throw ex;
+        }
     }
 
     // -----------------------------------------------------------------------
