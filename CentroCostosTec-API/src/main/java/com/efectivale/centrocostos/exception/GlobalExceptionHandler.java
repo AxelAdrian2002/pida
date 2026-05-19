@@ -45,9 +45,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataAccessException.class)
     public ResponseEntity<ApiResponse<Void>> handleDataAccess(DataAccessException ex) {
         String detalle = ex.getMostSpecificCause() != null ? ex.getMostSpecificCause().getMessage() : ex.getMessage();
+        String detallePlano = detalle == null ? "sin detalle" : detalle.replace('\n', ' ').replace('\r', ' ').trim();
+        if (detallePlano.length() > 220) {
+            detallePlano = detallePlano.substring(0, 220) + "...";
+        }
         log.error("Error de base de datos: {}", detalle, ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error(500, "Error de base de datos al procesar la solicitud"));
+                .body(ApiResponse.error(500, "Error de base de datos: " + detallePlano));
     }
 
     @ExceptionHandler(Exception.class)
