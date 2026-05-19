@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mockups - NOVAHUB Centro de Costos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        .container-center {
+            max-width: 900px;
+        }
+        .card-mockup {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            height: 100%;
+        }
+        .card-mockup:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+        }
+        .card-mockup img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+        }
+        .card-mockup-body {
+            padding: 20px;
+        }
+        .card-mockup-title {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #212529;
+            margin-bottom: 8px;
+        }
+        .card-mockup-desc {
+            font-size: 0.95rem;
+            color: #6c757d;
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+        .card-mockup-features {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-bottom: 16px;
+        }
+        .card-mockup-features li {
+            margin-bottom: 4px;
+        }
+        .btn-mockup {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s;
+        }
+        .btn-mockup-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-mockup-primary:hover {
+            color: white;
+            text-decoration: none;
+            transform: scale(1.02);
+        }
+        .header-mockups {
+            background: white;
+            border-radius: 12px;
+            padding: 40px 30px;
+            margin-bottom: 40px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .header-mockups h1 {
+            font-weight: 800;
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+        }
+        .header-mockups p {
+            font-size: 1.1rem;
+            color: #6c757d;
+            margin: 0;
+        }
+        .feature-badge {
+            display: inline-block;
+            background: #e7f1ff;
+            color: #0d6efd;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container container-center p-4">
+        <!-- Header -->
+        <div class="header-mockups mb-5">
+            <h1>
+                <i class="fas fa-tachometer-alt me-2"></i>NOVAHUB Mockups
+            </h1>
+            <p>Prototipos de interfaz para Centro de Costos TEC</p>
+        </div>
+
+        <!-- Grid de Mockups -->
+        <div class="row g-4">
+            <!-- Dashboard -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card-mockup">
+                    <div class="card-mockup" style="height: 180px; background: linear-gradient(135deg, #0d6efd 0%, #0056b3 100%); display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-chart-bar text-white" style="font-size: 3rem; opacity: 0.8;"></i>
+                    </div>
+                    <div class="card-mockup-body">
+                        <span class="feature-badge">
+                            <i class="fas fa-star me-1"></i>Principal
+                        </span>
+                        <div class="card-mockup-title">Dashboard</div>
+                        <div class="card-mockup-desc">Vista general con KPIs, saldo de monedero y acceso rápido a solicitudes</div>
+                        <ul class="card-mockup-features">
+                            <li>✓ 4 tarjetas KPI (pendientes, autorizadas, saldo, inversión)</li>
+                            <li>✓ Menú rápido para crear solicitudes</li>
+                            <li>✓ Tabla con últimas solicitudes</li>
+                            <li>✓ Información de unidad operativa</li>
+                        </ul>
+                        <a href="dashboard.html" class="btn btn-mockup btn-mockup-primary" target="_blank">
+                            <i class="fas fa-external-link-alt me-2"></i>Ver Mockup
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Crear Solicitud -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card-mockup">
+                    <div class="card-mockup" style="height: 180px; background: linear-gradient(135deg, #198754 0%, #0d5d2e 100%); display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-plus-circle text-white" style="font-size: 3rem; opacity: 0.8;"></i>
+                    </div>
+                    <div class="card-mockup-body">
+                        <span class="feature-badge">
+                            <i class="fas fa-edit me-1"></i>Formulario
+                        </span>
+                        <div class="card-mockup-title">Crear Solicitud</div>
+                        <div class="card-mockup-desc">Formulario para crear solicitudes de apoyo económico con cálculo automático de precio</div>
+                        <ul class="card-mockup-features">
+                            <li>✓ Información general de solicitud</li>
+                            <li>✓ Tabla dinámica de detalles de empleados</li>
+                            <li>✓ Cálculo automático de precioBase</li>
+                            <li>✓ Resumen financiero</li>
+                        </ul>
+                        <a href="crear-solicitud.html" class="btn btn-mockup btn-mockup-primary" target="_blank">
+                            <i class="fas fa-external-link-alt me-2"></i>Ver Mockup
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Listar Solicitudes -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card-mockup">
+                    <div class="card-mockup" style="height: 180px; background: linear-gradient(135deg, #0d6efd 0%, #0056b3 100%); display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-list text-white" style="font-size: 3rem; opacity: 0.8;"></i>
+                    </div>
+                    <div class="card-mockup-body">
+                        <span class="feature-badge">
+                            <i class="fas fa-table me-1"></i>Listado
+                        </span>
+                        <div class="card-mockup-title">Listar Solicitudes</div>
+                        <div class="card-mockup-desc">Consulta de todas las solicitudes con filtros, búsqueda y acciones rápidas</div>
+                        <ul class="card-mockup-features">
+                            <li>✓ Filtros por estado, tipo, búsqueda</li>
+                            <li>✓ Tabla con precio base mostrado</li>
+                            <li>✓ Acciones: ver, autorizar, rechazar</li>
+                            <li>✓ Paginación y selección masiva</li>
+                        </ul>
+                        <a href="listar-solicitudes.html" class="btn btn-mockup btn-mockup-primary" target="_blank">
+                            <i class="fas fa-external-link-alt me-2"></i>Ver Mockup
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Autorizar Solicitud -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card-mockup">
+                    <div class="card-mockup" style="height: 180px; background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%); display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-check-double text-white" style="font-size: 3rem; opacity: 0.8;"></i>
+                    </div>
+                    <div class="card-mockup-body">
+                        <span class="feature-badge">
+                            <i class="fas fa-check me-1"></i>Aprobación
+                        </span>
+                        <div class="card-mockup-title">Autorizar Solicitud</div>
+                        <div class="card-mockup-desc">Pantalla de decisión para autorizar o rechazar solicitudes con resumen detallado</div>
+                        <ul class="card-mockup-features">
+                            <li>✓ Datos completos de la solicitud</li>
+                            <li>✓ Detalles y resumen financiero</li>
+                            <li>✓ Radio buttons para autorizar/rechazar</li>
+                            <li>✓ Panel lateral con historial</li>
+                        </ul>
+                        <a href="autorizar-solicitud.html" class="btn btn-mockup btn-mockup-primary" target="_blank">
+                            <i class="fas fa-external-link-alt me-2"></i>Ver Mockup
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Footer -->
+        <div class="mt-5 p-3 text-center" style="color: rgba(255,255,255,0.8);">
+            <p style="font-size: 0.9rem; margin: 0;">
+                <i class="fas fa-info-circle me-2"></i>
+                Estos mockups son prototipos HTML estáticos. 
+                Los datos mostrados son de ejemplo para demostración.
+            </p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

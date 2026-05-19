@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración de Empresa - Centro de Costos NOVAHUB</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-light p-4">
+    <div class="container-lg">
+        <div class="mb-4">
+            <h4 class="text-warning"><i class="fas fa-cog me-2"></i>Configuración de Empresa</h4>
+            <small class="text-muted">Gestiona empleados, credenciales y branding</small>
+        </div>
+
+        <!-- Pestañas -->
+        <ul class="nav nav-tabs mb-4" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" href="#carga" data-bs-toggle="tab">
+                    <i class="fas fa-upload me-1"></i> Carga Masiva
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#credenciales" data-bs-toggle="tab">
+                    <i class="fas fa-credit-card me-1"></i> Credenciales
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#branding" data-bs-toggle="tab">
+                    <i class="fas fa-palette me-1"></i> Branding
+                </a>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <!-- Tab: Carga Masiva -->
+            <div class="tab-pane fade show active" id="carga">
+                <div class="row">
+                    <!-- Columna Izquierda: Carga -->
+                    <div class="col-lg-6 mb-3">
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-warning text-dark">
+                                <i class="fas fa-file-excel me-1"></i>Carga de Empleados
+                            </div>
+                            <div class="card-body">
+                                <p class="text-muted small">Carga un archivo Excel con los datos de empleados. Descarga la plantilla primero.</p>
+                                <button class="btn btn-outline-primary btn-sm mb-3 w-100">
+                                    <i class="fas fa-download me-1"></i> Descargar Plantilla
+                                </button>
+                                <div class="mb-3">
+                                    <label class="form-label">Selecciona archivo</label>
+                                    <input type="file" class="form-control" accept=".xlsx,.xls">
+                                </div>
+                                <button class="btn btn-warning w-100">
+                                    <i class="fas fa-play me-1"></i> Procesar Carga
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Columna Derecha: Resultados -->
+                    <div class="col-lg-6 mb-3">
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-light">
+                                <i class="fas fa-chart-pie me-1"></i>Resultados de Última Carga
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-success mb-2">
+                                    <strong><i class="fas fa-check-circle me-1"></i>Insertados:</strong> 45 registros
+                                </div>
+                                <div class="alert alert-info mb-2">
+                                    <strong><i class="fas fa-info-circle me-1"></i>Actualizados:</strong> 12 registros
+                                </div>
+                                <div class="alert alert-warning mb-2">
+                                    <strong><i class="fas fa-exclamation-circle me-1"></i>Rechazados:</strong> 3 registros (revisar email)
+                                </div>
+                                <div class="alert alert-secondary">
+                                    <strong><i class="fas fa-hourglass-end me-1"></i>Fecha:</strong> 2024-01-20 14:30:00
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Credenciales -->
+            <div class="tab-pane fade" id="credenciales">
+                <div class="row">
+                    <!-- Columna Izquierda: Generación -->
+                    <div class="col-lg-6 mb-3">
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-info text-white">
+                                <i class="fas fa-credit-card me-1"></i>Generar Lote de Credenciales
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="form-label">Tipo de Credencial</label>
+                                    <select class="form-select">
+                                        <option>Tarjeta Débito</option>
+                                        <option>Tarjeta Crédito</option>
+                                        <option>Acceso</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Cantidad</label>
+                                    <input type="number" class="form-control" value="50" min="1">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Número Inicial</label>
+                                    <input type="text" class="form-control" value="4532000000000001">
+                                </div>
+                                <button class="btn btn-info w-100 text-white">
+                                    <i class="fas fa-plus-circle me-1"></i> Generar Lote
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Columna Derecha: Asignación Automática -->
+                    <div class="col-lg-6 mb-3">
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-teal text-white" style="background: linear-gradient(135deg, #0dcaf0 0%, #0aa2c0 100%);">
+                                <i class="fas fa-robot me-1"></i>Asignación Automática
+                            </div>
+                            <div class="card-body">
+                                <p class="text-muted small">Asigna credenciales disponibles a empleados sin asignación.</p>
+                                <div class="mb-3">
+                                    <label class="form-label">Filtro de Empleados</label>
+                                    <select class="form-select">
+                                        <option>Todos sin asignación</option>
+                                        <option>Departamento: Gestión</option>
+                                        <option>Centro: Principal</option>
+                                    </select>
+                                </div>
+                                <div class="alert alert-light">
+                                    <strong>Empleados sin asignación:</strong> 23
+                                </div>
+                                <button class="btn w-100" style="background: linear-gradient(135deg, #0dcaf0 0%, #0aa2c0 100%); color: white;">
+                                    <i class="fas fa-wand-magic-sparkles me-1"></i> Asignar Automáticamente
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Branding -->
+            <div class="tab-pane fade" id="branding">
+                <div class="row">
+                    <!-- Columna Izquierda: Configuración -->
+                    <div class="col-lg-6 mb-3">
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-success text-white">
+                                <i class="fas fa-palette me-1"></i>Identidad Visual
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="form-label">Color Primario</label>
+                                    <div class="input-group">
+                                        <input type="color" class="form-control form-control-color" value="#667eea">
+                                        <input type="text" class="form-control" value="#667eea">
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Color Secundario</label>
+                                    <div class="input-group">
+                                        <input type="color" class="form-control form-control-color" value="#764ba2">
+                                        <input type="text" class="form-control" value="#764ba2">
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Logo URL</label>
+                                    <input type="url" class="form-control" value="https://ejemplo.com/logo.png">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Nombre de Empresa</label>
+                                    <input type="text" class="form-control" value="NOVAHUB GESTIÓN">
+                                </div>
+                                <button class="btn btn-success w-100">
+                                    <i class="fas fa-save me-1"></i> Guardar Configuración
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Columna Derecha: Preview -->
+                    <div class="col-lg-6 mb-3">
+                        <div class="card shadow-sm" style="border-top: 4px solid #667eea;">
+                            <div class="card-header">
+                                <i class="fas fa-eye me-1"></i>Vista Previa
+                            </div>
+                            <div class="card-body text-center">
+                                <div style="width: 80px; height: 80px; background-color: #667eea; border-radius: 8px; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-image fa-2x text-white"></i>
+                                </div>
+                                <h5 style="color: #667eea;">NOVAHUB GESTIÓN</h5>
+                                <p class="text-muted">Colores corporativos aplicados</p>
+                                <div class="mt-3">
+                                    <span class="badge" style="background-color: #667eea;">Color Primario</span>
+                                    <span class="badge" style="background-color: #764ba2;">Color Secundario</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

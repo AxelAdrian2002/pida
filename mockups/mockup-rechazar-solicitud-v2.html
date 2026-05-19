@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rechazar Solicitud - Centro de Costos NOVAHUB</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-dark" style="display: flex; align-items: center; justify-content: center; min-height: 100vh;">
+    <div class="modal show d-block" role="dialog">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <!-- Header -->
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Rechazar Solicitud
+                    </h5>
+                </div>
+
+                <!-- Body -->
+                <div class="modal-body">
+                    <div class="alert alert-danger" role="alert">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Solicitud ID:</strong> SOL-12345 | <strong>Tipo:</strong> DISPERSION
+                    </div>
+
+                    <p class="text-muted mb-3">
+                        Esta acción es <strong>irreversible</strong>. El solicitante será notificado del rechazo.
+                    </p>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-clipboard-list me-1"></i>Motivo de Rechazo
+                        </label>
+                        <select class="form-select" id="motivo">
+                            <option value="">Selecciona un motivo...</option>
+                            <option value="datos_incompletos">Datos Incompletos</option>
+                            <option value="fondos_insuficientes">Fondos Insuficientes</option>
+                            <option value="documentacion_faltante">Documentación Faltante</option>
+                            <option value="incumplimiento_politicas">Incumplimiento de Políticas</option>
+                            <option value="informacion_incorrecta">Información Incorrecta</option>
+                            <option value="duplicado">Solicitud Duplicada</option>
+                            <option value="otro">Otro Motivo</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-comment me-1"></i>Observaciones/Detalles
+                        </label>
+                        <textarea class="form-control" rows="4" placeholder="Explica el motivo del rechazo en detalle..."></textarea>
+                        <small class="form-text text-muted">Este mensaje será visible para el solicitante</small>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="notificar" checked>
+                        <label class="form-check-label" for="notificar">
+                            <i class="fas fa-bell me-1"></i>Notificar al solicitante por email
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Cancelar
+                    </button>
+                    <button type="button" class="btn btn-danger">
+                        <i class="fas fa-ban me-1"></i>Confirmar Rechazo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay -->
+    <div class="modal-backdrop fade show"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

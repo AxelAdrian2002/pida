@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actualizar Empleado - Centro de Costos NOVAHUB</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-light p-4">
+    <div class="container-sm">
+        <div class="mb-4">
+            <h4 class="text-primary"><i class="fas fa-user-edit me-2"></i>Actualizar Empleado</h4>
+            <small class="text-muted">Empleado ID: 10001 - Andrea Lopez</small>
+        </div>
+
+        <div class="card shadow-sm">
+            <form class="p-4">
+                <!-- Sección Identificación -->
+                <div class="mb-4">
+                    <h6 class="text-primary mb-3">
+                        <i class="fas fa-id-card me-2"></i>Identificación
+                    </h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Empleado ID (Lectura)</label>
+                            <input type="text" class="form-control" value="10001" disabled>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">RFC</label>
+                            <input type="text" class="form-control" value="LOXA850315ABC">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Nombre Completo</label>
+                            <input type="text" class="form-control" value="Andrea Lopez Alvarado">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Fecha Nacimiento</label>
+                            <input type="date" class="form-control" value="1985-03-15">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección Laboral -->
+                <div class="mb-4">
+                    <h6 class="text-primary mb-3">
+                        <i class="fas fa-briefcase me-2"></i>Datos Laborales
+                    </h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Puesto</label>
+                            <input type="text" class="form-control" value="Coordinadora de Gestión">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Centro de Costos</label>
+                            <select class="form-select">
+                                <option selected>Centro Principal</option>
+                                <option>Centro Norte</option>
+                                <option>Centro Sur</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Número de Empleado Alterno</label>
+                            <input type="text" class="form-control" value="EMP-2024-0001">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Departamento</label>
+                            <input type="text" class="form-control" value="Gestión de Solicitudes">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Extensión</label>
+                            <input type="text" class="form-control" value="2501">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Jefe Directo</label>
+                            <input type="text" class="form-control" placeholder="Nombre o ID">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección Contacto -->
+                <div class="mb-4">
+                    <h6 class="text-primary mb-3">
+                        <i class="fas fa-phone me-2"></i>Contacto
+                    </h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Email Corporativo</label>
+                            <input type="email" class="form-control" value="alopez@empresa.com">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Email Personal</label>
+                            <input type="email" class="form-control" value="alopez@gmail.com">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Teléfono Corporativo</label>
+                            <input type="tel" class="form-control" value="(555) 8765-4321">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Teléfono Personal</label>
+                            <input type="tel" class="form-control" value="(555) 9876-5432">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Domicilio</label>
+                            <input type="text" class="form-control" value="Calle Principal 123, Apt 4B">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones -->
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i> Guardar Cambios
+                    </button>
+                    <button type="reset" class="btn btn-outline-secondary">
+                        <i class="fas fa-redo me-1"></i> Limpiar
+                    </button>
+                    <button type="button" class="btn btn-outline-danger">
+                        <i class="fas fa-times me-1"></i> Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

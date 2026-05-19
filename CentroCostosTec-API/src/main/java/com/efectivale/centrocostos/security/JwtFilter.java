@@ -11,7 +11,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 @Component
 @RequiredArgsConstructor
@@ -37,14 +39,23 @@ public class JwtFilter extends OncePerRequestFilter {
                 Long consignatarioId = jwtUtil.getConsignatarioIdFromToken(token);
                 String corporativoId = jwtUtil.getCorporativoIdFromToken(token);
                 String centroId = jwtUtil.getCentroIdFromToken(token);
+                List<String> permisos = jwtUtil.getPermisosFromToken(token);
                 
                 // Crear objeto de detalles del contexto
                 ContextDetails contextDetails = new ContextDetails(
                     idUsuario, clienteId, consignatarioId, corporativoId, centroId
                 );
                 
-                var auth = new UsernamePasswordAuthenticationToken(
-                        username, null, List.of(new SimpleGrantedAuthority("ROLE_" + rol)));
+                List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+                authorities.add(new SimpleGrantedAuthority("ROLE_" + rol));
+                for (String permiso : permisos) {
+                    String normalized = permiso == null ? "" : permiso.trim().toUpperCase(Locale.ROOT);
+                    if (!normalized.isEmpty()) {
+                        authorities.add(new SimpleGrantedAuthority("PERM_" + normalized));
+                    }
+                }
+
+                var auth = new UsernamePasswordAuthenticationToken(username, null, authorities);
                 auth.setDetails(contextDetails);
                 SecurityContextHolder.getContext().setAuthentication(auth);
             }

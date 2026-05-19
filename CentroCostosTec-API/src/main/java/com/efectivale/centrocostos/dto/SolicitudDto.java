@@ -1,10 +1,11 @@
 package com.efectivale.centrocostos.dto;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import java.math.BigDecimal;
-import java.util.List;
 
 @Data
 public class SolicitudDto {
@@ -15,6 +16,7 @@ public class SolicitudDto {
     private String descripcion;
     private String referencia;
     private BigDecimal montoTotal;
+    private BigDecimal precioBase;
 
     @NotNull(message = "El usuario es obligatorio")
     private Long idUsuario;
@@ -55,6 +57,14 @@ public class SolicitudDto {
 
     public void setMontoTotal(BigDecimal montoTotal) {
         this.montoTotal = montoTotal;
+    }
+
+    public BigDecimal getPrecioBase() {
+        return precioBase;
+    }
+
+    public void setPrecioBase(BigDecimal precioBase) {
+        this.precioBase = precioBase;
     }
 
     public Long getIdUsuario() {

@@ -9,9 +9,6 @@ public class LoginDto {
     @NotBlank(message = "El corporativo es obligatorio")
     private String corporativo;
 
-    @NotBlank(message = "El centro de costos es obligatorio")
-    private String centrocostos;
-
     @NotBlank(message = "El usuario es obligatorio")
     private String username;
 
@@ -27,14 +24,6 @@ public class LoginDto {
 
     public void setCorporativo(String corporativo) {
         this.corporativo = corporativo;
-    }
-
-    public String getCentrocostos() {
-        return centrocostos;
-    }
-
-    public void setCentrocostos(String centrocostos) {
-        this.centrocostos = centrocostos;
     }
 
     public String getUsername() {

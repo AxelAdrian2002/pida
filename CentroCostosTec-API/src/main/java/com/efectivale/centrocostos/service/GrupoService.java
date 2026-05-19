@@ -29,6 +29,7 @@ public class GrupoService {
     private final @Qualifier("pddespensaJdbc") JdbcTemplate pddespensaJdbc;
     private final MultiDbBusinessService multiDbBusinessService;
     private final ContextProvider contextProvider;
+    private final TenantAuditService tenantAuditService;
 
     // ------- REGISTRAR GRUPO -------
     @Transactional
@@ -72,9 +73,17 @@ public class GrupoService {
             dto.getObservacion()
         );
 
+        tenantAuditService.logFromContext(
+            "GRUPOS",
+            "REGISTRAR_GRUPO",
+            "Grupo registrado id=" + idGrupo + " nombre=" + grupoId,
+            contextProvider
+        );
+
         return grupoRepository.findById(idGrupo)
                 .orElseThrow(() -> new IllegalStateException("No se pudo recuperar el grupo creado con id " + idGrupo));
     }
+
 
     @Transactional
     public Grupo actualizarGrupo(Long idGrupo, GrupoDto dto) {
@@ -138,6 +147,13 @@ public class GrupoService {
             );
         }
 
+        tenantAuditService.logFromContext(
+            "GRUPOS",
+            "ACTUALIZAR_GRUPO",
+            "Grupo actualizado id=" + idGrupo + " nombre=" + actualizado.getNombre(),
+            contextProvider
+        );
+
         return actualizado;
     }
 
@@ -149,6 +165,7 @@ public class GrupoService {
         multiDbBusinessService.validarContextoGrupo(null, null, "ASIGNAR");
         Grupo grupo = grupoRepository.findById(idGrupo)
                 .orElseThrow(() -> new IllegalArgumentException("Grupo no encontrado: " + idGrupo));
+        validarGrupoPerteneceSesion(grupo);
 
         String numeroEmpleadoResolvido = numeroEmpleado;
         if ((numeroEmpleadoResolvido == null || numeroEmpleadoResolvido.isBlank()) && idEmpleado != null) {
@@ -190,6 +207,13 @@ public class GrupoService {
 
         persistirMetadataAsignacion(idGrupo, idEmpleado, numeroEmpleadoResolvido, usuarioAsigno);
 
+        tenantAuditService.logFromContext(
+            "GRUPOS",
+            "ASIGNAR_EMPLEADO",
+            "Asignacion grupoId=" + idGrupo + " empleado=" + numeroEmpleadoResolvido,
+            contextProvider
+        );
+
         return asignacion;
     }
 
@@ -197,6 +221,7 @@ public class GrupoService {
     public List<GrupoEmpleado> reporteGrupo(Long idGrupo) {
         Grupo grupo = grupoRepository.findById(idGrupo)
                 .orElseThrow(() -> new IllegalArgumentException("Grupo no encontrado: " + idGrupo));
+        validarGrupoPerteneceSesion(grupo);
 
         Map<String, AsignacionMeta> metadata = cargarMetadataAsignacion(idGrupo);
 
@@ -302,6 +327,19 @@ public class GrupoService {
             throw new IllegalArgumentException("grupoid es obligatorio");
         }
         return grupoId.trim().toUpperCase();
+    }
+
+    private void validarGrupoPerteneceSesion(Grupo grupo) {
+        Long clienteIdSesion = contextProvider.getClienteId();
+        Long consignatarioIdSesion = contextProvider.getConsignatarioId();
+
+        if (clienteIdSesion == null || consignatarioIdSesion == null) {
+            throw new IllegalStateException("No se pudo obtener el contexto de cliente/consignatario de la sesión");
+        }
+
+        if (!clienteIdSesion.equals(grupo.getClienteId()) || !consignatarioIdSesion.equals(grupo.getConsignatarioId())) {
+            throw new IllegalArgumentException("No tiene permisos para acceder a este grupo");
+        }
     }
 
     public List<GrupoListadoDto> listarGrupos() {

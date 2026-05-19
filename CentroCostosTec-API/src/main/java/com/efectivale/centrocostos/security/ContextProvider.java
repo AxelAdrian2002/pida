@@ -80,6 +80,30 @@ public class ContextProvider {
         return auth != null ? auth.getName() : null;
     }
 
+    public String getCorporativoId() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || auth.getDetails() == null) {
+            return null;
+        }
+        Object details = auth.getDetails();
+        if (details instanceof ContextDetails contextDetails) {
+            return contextDetails.getCorporativoId();
+        }
+        return null;
+    }
+
+    public String getCentroId() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || auth.getDetails() == null) {
+            return null;
+        }
+        Object details = auth.getDetails();
+        if (details instanceof ContextDetails contextDetails) {
+            return contextDetails.getCentroId();
+        }
+        return null;
+    }
+
     /**
      * Verifica que el clienteId/consignatarioId del DTO coincidan con la sesión.
      * Lanza excepción si no coinciden (intento de escalamiento de privilegios).

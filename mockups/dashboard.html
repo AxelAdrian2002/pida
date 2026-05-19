@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - NOVAHUB Centro de Costos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #0d6efd;
+            --success-green: #198754;
+            --info-cyan: #17a2b8;
+            --warning-yellow: #ffc107;
+            --danger-red: #dc3545;
+        }
+        body {
+            background-color: #f8f9fa;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-blue), #0056b3);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .card-kpi {
+            border: none;
+            border-radius: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card-kpi:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .badge-custom {
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 0.35rem 0.65rem;
+        }
+        .btn-solicitud {
+            border: 1px solid #dee2e6;
+            padding: 12px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            color: var(--primary-blue);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .btn-solicitud:hover {
+            background-color: #f0f6ff;
+            border-color: var(--primary-blue);
+            color: var(--primary-blue);
+            text-decoration: none;
+        }
+        .table-hover tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        .estado-pendiente { color: #ff9800; }
+        .estado-autorizado { color: #4caf50; }
+        .estado-rechazado { color: #f44336; }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark sticky-top">
+        <div class="container-fluid">
+            <span class="navbar-brand mb-0 h5">
+                <i class="fas fa-tachometer-alt me-2"></i>NOVAHUB - Centro de Costos TEC
+            </span>
+            <span class="text-white-50 small">
+                Unidad: <strong>OPER-100</strong> | Cliente: <strong>1001</strong>
+                <button class="btn btn-sm btn-outline-light ms-3">
+                    <i class="fas fa-sign-out-alt me-1"></i>Cerrar sesión
+                </button>
+            </span>
+        </div>
+    </nav>
+
+    <div class="container-fluid p-4">
+        <!-- Header -->
+        <div class="mb-4">
+            <h3 class="mb-1 text-primary">
+                <i class="fas fa-tachometer-alt me-2"></i>Dashboard de Solicitudes
+            </h3>
+            <p class="text-muted">Gestión centralizada de solicitudes y operaciones. Mayo 2026</p>
+        </div>
+
+        <!-- KPIs -->
+        <div class="row g-3 mb-4">
+            <!-- Pendientes -->
+            <div class="col-md-3">
+                <div class="card card-kpi" style="background: linear-gradient(135deg, rgba(13, 110, 253, 0.1), rgba(13, 110, 253, 0.05));">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <p class="text-muted small mb-1">Solicitudes Pendientes</p>
+                                <h2 class="text-primary mb-2">12</h2>
+                                <small class="text-muted">Requieren atención</small>
+                            </div>
+                            <i class="fas fa-hourglass-half text-primary" style="font-size: 2rem; opacity: 0.5;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Autorizadas -->
+            <div class="col-md-3">
+                <div class="card card-kpi" style="background: linear-gradient(135deg, rgba(25, 135, 84, 0.1), rgba(25, 135, 84, 0.05));">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <p class="text-muted small mb-1">Solicitudes Autorizadas</p>
+                                <h2 class="text-success mb-2">28</h2>
+                                <small class="text-muted">En proceso</small>
+                            </div>
+                            <i class="fas fa-check-circle text-success" style="font-size: 2rem; opacity: 0.5;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Saldo Monedero -->
+            <div class="col-md-3">
+                <div class="card card-kpi" style="background: linear-gradient(135deg, rgba(23, 162, 184, 0.1), rgba(23, 162, 184, 0.05));">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <p class="text-muted small mb-1">Saldo Monedero</p>
+                                <h2 class="text-info mb-2">$150,000</h2>
+                                <small class="text-muted">MXN disponible</small>
+                            </div>
+                            <i class="fas fa-wallet text-info" style="font-size: 2rem; opacity: 0.5;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inversión Total -->
+            <div class="col-md-3">
+                <div class="card card-kpi" style="background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 193, 7, 0.05));">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <p class="text-muted small mb-1">Inversión Total</p>
+                                <h2 class="text-warning mb-2">$127,500</h2>
+                                <small class="text-muted">Mayo 2026</small>
+                            </div>
+                            <i class="fas fa-chart-line text-warning" style="font-size: 2rem; opacity: 0.5;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menú Rápido -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white fw-semibold border-bottom">
+                <i class="fas fa-plus-circle me-2 text-primary"></i>Crear Nueva Solicitud
+            </div>
+            <div class="card-body">
+                <div class="row g-2">
+                    <div class="col-md-3">
+                        <a href="#" class="btn-solicitud">
+                            <i class="fas fa-money-bill-wave text-primary" style="font-size: 1.3rem;"></i>
+                            <div>
+                                <strong>Apoyo Económico</strong>
+                                <small class="d-block text-muted">$1,500/empleado</small>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="#" class="btn-solicitud">
+                            <i class="fas fa-sync-alt text-primary" style="font-size: 1.3rem;"></i>
+                            <div>
+                                <strong>Reposición</strong>
+                                <small class="d-block text-muted">$120/tarjeta</small>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="#" class="btn-solicitud">
+                            <i class="fas fa-id-card text-primary" style="font-size: 1.3rem;"></i>
+                            <div>
+                                <strong>Nueva Asignación</strong>
+                                <small class="d-block text-muted">$80/tarjeta</small>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="#" class="btn-solicitud">
+                            <i class="fas fa-plus-square text-primary" style="font-size: 1.3rem;"></i>
+                            <div>
+                                <strong>Asignación Adicional</strong>
+                                <small class="d-block text-muted">$150/tarjeta</small>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Últimas Solicitudes -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-white fw-semibold border-bottom">
+                <i class="fas fa-history me-2 text-primary"></i>Últimas Solicitudes
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light small fw-semibold">
+                        <tr>
+                            <th>ID</th>
+                            <th>Tipo</th>
+                            <th>Descripción</th>
+                            <th>Monto</th>
+                            <th>Precio Base</th>
+                            <th>Estado</th>
+                            <th>Fecha</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>#SOL-001</strong></td>
+                            <td><span class="badge bg-info">Dispersión</span></td>
+                            <td>Apoyo económico mayo</td>
+                            <td>$3,000.00</td>
+                            <td><span class="badge bg-light text-dark">$3,000.00</span></td>
+                            <td><span class="badge bg-warning estado-pendiente">Pendiente</span></td>
+                            <td>15/05/2026</td>
+                            <td><a href="#" class="btn btn-xs btn-outline-primary btn-sm">Ver</a></td>
+                        </tr>
+                        <tr>
+                            <td><strong>#SOL-002</strong></td>
+                            <td><span class="badge bg-secondary">Stock</span></td>
+                            <td>Reposición tarjeta dañada</td>
+                            <td>$240.00</td>
+                            <td><span class="badge bg-light text-dark">$240.00</span></td>
+                            <td><span class="badge bg-success estado-autorizado">Autorizado</span></td>
+                            <td>14/05/2026</td>
+                            <td><a href="#" class="btn btn-xs btn-outline-primary btn-sm">Ver</a></td>
+                        </tr>
+                        <tr>
+                            <td><strong>#SOL-003</strong></td>
+                            <td><span class="badge bg-primary">Tarjeta</span></td>
+                            <td>Nueva asignación OPER-100</td>
+                            <td>$80.00</td>
+                            <td><span class="badge bg-light text-dark">$80.00</span></td>
+                            <td><span class="badge bg-success estado-autorizado">Autorizado</span></td>
+                            <td>13/05/2026</td>
+                            <td><a href="#" class="btn btn-xs btn-outline-primary btn-sm">Ver</a></td>
+                        </tr>
+                        <tr>
+                            <td><strong>#SOL-004</strong></td>
+                            <td><span class="badge bg-danger">Adicional</span></td>
+                            <td>Asignación adicional</td>
+                            <td>$150.00</td>
+                            <td><span class="badge bg-light text-dark">$150.00</span></td>
+                            <td><span class="badge bg-danger estado-rechazado">Rechazado</span></td>
+                            <td>12/05/2026</td>
+                            <td><a href="#" class="btn btn-xs btn-outline-primary btn-sm">Ver</a></td>
+                        </tr>
+                        <tr>
+                            <td><strong>#SOL-005</strong></td>
+                            <td><span class="badge bg-info">Dispersión</span></td>
+                            <td>Pago de nómina extra</td>
+                            <td>$6,000.00</td>
+                            <td><span class="badge bg-light text-dark">$6,000.00</span></td>
+                            <td><span class="badge bg-warning estado-pendiente">Pendiente</span></td>
+                            <td>15/05/2026</td>
+                            <td><a href="#" class="btn btn-xs btn-outline-primary btn-sm">Ver</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

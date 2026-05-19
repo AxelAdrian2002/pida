@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prefactura/Resumen Solicitud - Centro de Costos NOVAHUB</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-light p-4">
+    <div class="container-sm" style="max-width: 700px;">
+        <div class="mb-4">
+            <h4 class="text-success"><i class="fas fa-file-invoice-dollar me-2"></i>Resumen de Solicitud</h4>
+            <small class="text-muted">Confirma los detalles antes de autorizar</small>
+        </div>
+
+        <div class="card shadow-sm mb-3">
+            <div class="card-header bg-light">
+                <i class="fas fa-id-card me-1"></i>Información de Solicitud
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="text-muted small">ID Solicitud</label>
+                        <p class="fw-bold">SOL-12345</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small">Tipo</label>
+                        <p class="fw-bold"><span class="badge bg-primary">DISPERSION</span></p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small">Creada Por</label>
+                        <p class="fw-bold">usuario@empresa.com</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small">Fecha Creación</label>
+                        <p class="fw-bold">2024-01-15 09:30</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detalles según tipo -->
+        <div class="card shadow-sm mb-3">
+            <div class="card-header bg-light">
+                <i class="fas fa-list me-1"></i>Detalles de la Solicitud
+            </div>
+            <div class="card-body">
+                <table class="table table-sm mb-0">
+                    <tr>
+                        <td><strong>Cantidad de Empleados</strong></td>
+                        <td class="text-end">50</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Precio Unitario</strong></td>
+                        <td class="text-end">$1,500</td>
+                    </tr>
+                    <tr class="table-active">
+                        <td><strong>Subtotal</strong></td>
+                        <td class="text-end"><strong>$75,000</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Impuestos (IVA 16%)</strong></td>
+                        <td class="text-end">$12,000</td>
+                    </tr>
+                    <tr class="bg-light">
+                        <td><strong>TOTAL</strong></td>
+                        <td class="text-end"><strong class="text-success">$87,000</strong></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- Datos Fiscales -->
+        <div class="card shadow-sm mb-3">
+            <div class="card-header bg-light">
+                <i class="fas fa-receipt me-1"></i>Datos Fiscales
+            </div>
+            <div class="card-body">
+                <div class="row mb-2">
+                    <div class="col-md-6">
+                        <label class="text-muted small">RFC</label>
+                        <p>EFV210515ABC</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small">Razón Social</label>
+                        <p>EFECTIVALE SA DE CV</p>
+                    </div>
+                    <div class="col-12">
+                        <label class="text-muted small">Domicilio Fiscal</label>
+                        <p>Av. Principal 500, Centro, 06500 CDMX</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Saldo Disponible -->
+        <div class="card shadow-sm mb-3">
+            <div class="card-header bg-light">
+                <i class="fas fa-wallet me-1"></i>Información de Fondos
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <label class="text-muted small">Saldo Monedero</label>
+                        <p class="fw-bold text-primary">$150,000</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small">Saldo Crédito</label>
+                        <p class="fw-bold text-success">$100,000</p>
+                    </div>
+                </div>
+                <div class="alert alert-success mt-3">
+                    <i class="fas fa-check-circle me-1"></i> Fondos suficientes disponibles
+                </div>
+            </div>
+        </div>
+
+        <!-- Observaciones -->
+        <div class="card shadow-sm mb-3">
+            <div class="card-header bg-light">
+                <i class="fas fa-sticky-note me-1"></i>Observaciones
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Solicitud de dispersión para nómina de enero. 50 empleados, transferencia bancaria.</p>
+            </div>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="d-flex gap-2">
+            <button class="btn btn-success flex-grow-1">
+                <i class="fas fa-check me-1"></i> Autorizar
+            </button>
+            <button class="btn btn-danger flex-grow-1">
+                <i class="fas fa-times me-1"></i> Rechazar
+            </button>
+            <button class="btn btn-outline-secondary flex-grow-1">
+                <i class="fas fa-arrow-left me-1"></i> Atrás
+            </button>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

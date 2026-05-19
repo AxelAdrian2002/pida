@@ -13,6 +13,7 @@ public class Solicitud {
     private String tipoSolicitud;
     private String estado;
     private BigDecimal montoTotal;
+    private BigDecimal precioBase;
     private Long idUsuario;
     private String descripcion;
     private String referencia;
@@ -59,6 +60,14 @@ public class Solicitud {
 
     public void setMontoTotal(BigDecimal montoTotal) {
         this.montoTotal = montoTotal;
+    }
+
+    public BigDecimal getPrecioBase() {
+        return precioBase;
+    }
+
+    public void setPrecioBase(BigDecimal precioBase) {
+        this.precioBase = precioBase;
     }
 
     public Long getIdUsuario() {

@@ -1,13 +1,13 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
   template: `
   <div class="login-container d-flex justify-content-center align-items-center vh-100 bg-light">
     <div class="card shadow p-4" style="width: 420px;">
@@ -23,15 +23,6 @@ import { AuthService } from '../../services/auth.service';
                  placeholder="Corporativo" autocomplete="organization">
           <div class="text-danger small" *ngIf="loginForm.get('corporativo')?.invalid && submitted">
             El corporativo es obligatorio
-          </div>
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label">Unidad Operativa <span class="text-danger">*</span></label>
-          <input type="text" class="form-control" formControlName="centrocostos"
-                 placeholder="Unidad operativa" autocomplete="off">
-          <div class="text-danger small" *ngIf="loginForm.get('centrocostos')?.invalid && submitted">
-            La unidad operativa es obligatoria
           </div>
         </div>
 
@@ -60,6 +51,14 @@ import { AuthService } from '../../services/auth.service';
           Iniciar sesión
         </button>
       </form>
+
+      <hr class="my-3">
+      <div class="text-center">
+        <span class="text-muted small">¿Tu empresa aún no está registrada?</span><br>
+        <a routerLink="/registro-empresa" class="btn btn-outline-secondary btn-sm mt-2 w-100">
+          Registrar mi empresa
+        </a>
+      </div>
     </div>
   </div>
   `
@@ -75,7 +74,6 @@ export class LoginComponent {
   constructor(private fb: FormBuilder, private authService: AuthService, private router: Router) {
     this.loginForm = this.fb.group({
       corporativo:  ['', Validators.required],
-      centrocostos: ['', Validators.required],
       username:     ['', Validators.required],
       password:     ['', Validators.required]
     });
@@ -93,7 +91,10 @@ export class LoginComponent {
     };
 
     this.authService.login(payload).subscribe({
-      next: () => this.router.navigate(['/']),
+      next: (res) => {
+        const requiereCambio = Boolean(res?.datos?.requiereCambioPassword);
+        this.router.navigate([requiereCambio ? '/Administracion_Login/Cambio_Password' : '/']);
+      },
       error: (err) => {
         this.intentos++;
         const msg = err?.error?.mensaje ?? err?.error?.message ?? 'Usuario o contraseña incorrectos';

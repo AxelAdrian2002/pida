@@ -50,13 +50,26 @@ public class SolicitudService {
     private final @Qualifier("pddespensaJdbc") JdbcTemplate pddespensaJdbc;
     private final MultiDbBusinessService multiDbBusinessService;
     private final ContextProvider contextProvider;
+    private final SolicitudAuditoriaService auditoriaService;
+    private final NotificacionService notificacionService;
 
     // ------- SOLICITUD DISPERSION -------
     @Transactional
     public Solicitud crearSolicitudDispersion(SolicitudDto dto) {
         log.info("Creando solicitud dispersion para usuario {}", dto.getIdUsuario());
         validarTipoSolicitud(dto.getTipoSolicitud(), "DISPERSION");
-        multiDbBusinessService.validarContextoSolicitud(dto, "DISPERSION");
+        
+        // Validar usando el contexto autenticado
+        Long clienteId = contextProvider.getClienteId();
+        Long consignatarioId = contextProvider.getConsignatarioId();
+        if (clienteId == null || consignatarioId == null) {
+            throw new IllegalStateException("No se pudo obtener el contexto de cliente/consignatario de la sesión");
+        }
+        
+        SolicitudDto dtoValidation = new SolicitudDto();
+        dtoValidation.setClienteId(clienteId);
+        dtoValidation.setConsignatarioId(consignatarioId);
+        multiDbBusinessService.validarContextoSolicitud(dtoValidation, "DISPERSION");
 
         return guardarSolicitud(dto, "DISPERSION");
     }
@@ -66,7 +79,18 @@ public class SolicitudService {
     public Solicitud crearSolicitudStock(SolicitudDto dto) {
         log.info("Creando solicitud stock para usuario {}", dto.getIdUsuario());
         validarTipoSolicitud(dto.getTipoSolicitud(), "STOCK");
-        multiDbBusinessService.validarContextoSolicitud(dto, "STOCK");
+        
+        // Validar usando el contexto autenticado
+        Long clienteId = contextProvider.getClienteId();
+        Long consignatarioId = contextProvider.getConsignatarioId();
+        if (clienteId == null || consignatarioId == null) {
+            throw new IllegalStateException("No se pudo obtener el contexto de cliente/consignatario de la sesión");
+        }
+        
+        SolicitudDto dtoValidation = new SolicitudDto();
+        dtoValidation.setClienteId(clienteId);
+        dtoValidation.setConsignatarioId(consignatarioId);
+        multiDbBusinessService.validarContextoSolicitud(dtoValidation, "STOCK");
 
         return guardarSolicitud(dto, "STOCK");
     }
@@ -76,7 +100,18 @@ public class SolicitudService {
     public Solicitud crearSolicitudAsignacion(SolicitudDto dto) {
         log.info("Creando solicitud nueva asignacion para usuario {}", dto.getIdUsuario());
         validarTipoSolicitud(dto.getTipoSolicitud(), "TARJETA");
-        multiDbBusinessService.validarContextoSolicitud(dto, "TARJETA");
+        
+        // Validar usando el contexto autenticado
+        Long clienteId = contextProvider.getClienteId();
+        Long consignatarioId = contextProvider.getConsignatarioId();
+        if (clienteId == null || consignatarioId == null) {
+            throw new IllegalStateException("No se pudo obtener el contexto de cliente/consignatario de la sesión");
+        }
+        
+        SolicitudDto dtoValidation = new SolicitudDto();
+        dtoValidation.setClienteId(clienteId);
+        dtoValidation.setConsignatarioId(consignatarioId);
+        multiDbBusinessService.validarContextoSolicitud(dtoValidation, "TARJETA");
 
         return guardarSolicitud(dto, "TARJETA");
     }
@@ -86,7 +121,18 @@ public class SolicitudService {
     public Solicitud crearSolicitudAdicional(SolicitudDto dto) {
         log.info("Creando solicitud adicional para usuario {}", dto.getIdUsuario());
         validarTipoSolicitud(dto.getTipoSolicitud(), "ADICIONAL");
-        multiDbBusinessService.validarContextoSolicitud(dto, "ADICIONAL");
+        
+        // Validar usando el contexto autenticado
+        Long clienteId = contextProvider.getClienteId();
+        Long consignatarioId = contextProvider.getConsignatarioId();
+        if (clienteId == null || consignatarioId == null) {
+            throw new IllegalStateException("No se pudo obtener el contexto de cliente/consignatario de la sesión");
+        }
+        
+        SolicitudDto dtoValidation = new SolicitudDto();
+        dtoValidation.setClienteId(clienteId);
+        dtoValidation.setConsignatarioId(consignatarioId);
+        multiDbBusinessService.validarContextoSolicitud(dtoValidation, "ADICIONAL");
 
         return guardarSolicitud(dto, "ADICIONAL");
     }
@@ -109,13 +155,14 @@ public class SolicitudService {
         }
 
         solicitud.setEstado("AUTORIZADO");
+        solicitud.setEstadoId("PLIB");
         solicitud.setFechaAutorizacion(LocalDateTime.now());
         solicitud.setObservaciones(observaciones);
         solicitud.setDescripcion(observaciones != null && !observaciones.isBlank() ? observaciones : "N/D");
 
         int actualizados = megadbpedidoJdbc.update(
-                "UPDATE pedido SET estadopedidoid = ?, fechamodificacion = ?, comentarios = ? WHERE pedidoid = ? AND activo = TRUE",
-                solicitud.getEstadoId(),
+                "UPDATE solicitud_operativa SET estadosolicitudid = ?, fechamodificacion = ?, comentario = ? WHERE solicitudid = ? AND activo = TRUE",
+                "PLIB",
                 Timestamp.valueOf(LocalDateTime.now()),
                 solicitud.getDescripcion(),
                 idSolicitud
@@ -124,7 +171,134 @@ public class SolicitudService {
         if (actualizados != 1) {
             throw new IllegalStateException("No fue posible autorizar la solicitud " + idSolicitud);
         }
+        
+        // Registrar en auditoría
+        auditoriaService.registrarAutorizacion(
+            idSolicitud,
+            solicitud.getClienteId(),
+            solicitud.getConsignatarioId(),
+            idUsuarioAutoriza,
+            "Sistema",
+            solicitud.getTipoSolicitud(),
+            observaciones
+        );
+        
+        // Enviar notificación
+        try {
+            notificacionService.notificarAutorizacion(solicitud, idUsuarioAutoriza, observaciones);
+        } catch (Exception ex) {
+            log.warn("Error al enviar notificación de autorización: {}", ex.getMessage());
+        }
 
+        return solicitud;
+    }
+
+    // ------- RECHAZAR SOLICITUD -------
+    @Transactional
+    public Solicitud rechazarSolicitud(Long idSolicitud, Long idUsuarioRechaza, String motivo) {
+        log.info("Rechazando solicitud {} por usuario {}", idSolicitud, idUsuarioRechaza);
+
+        Solicitud solicitud = obtenerSolicitud(idSolicitud);
+
+        if (!"PENDIENTE".equals(solicitud.getEstado())) {
+            throw new IllegalArgumentException("Solo se pueden rechazar solicitudes en estado PENDIENTE");
+        }
+        
+        if (motivo == null || motivo.isBlank()) {
+            throw new IllegalArgumentException("El motivo del rechazo es requerido");
+        }
+
+        solicitud.setEstado("RECHAZADO");
+        solicitud.setEstadoId("RECH");
+        solicitud.setObservaciones(motivo);
+        solicitud.setDescripcion("Rechazada - " + motivo);
+
+        int actualizados = megadbpedidoJdbc.update(
+                "UPDATE solicitud_operativa SET estadosolicitudid = ?, fechamodificacion = ?, comentario = ? WHERE solicitudid = ? AND activo = TRUE",
+                "RECH",
+                Timestamp.valueOf(LocalDateTime.now()),
+                solicitud.getDescripcion(),
+                idSolicitud
+        );
+
+        if (actualizados != 1) {
+            throw new IllegalStateException("No fue posible rechazar la solicitud " + idSolicitud);
+        }
+        
+        // Registrar en auditoría
+        auditoriaService.registrarRechazo(
+            idSolicitud,
+            solicitud.getClienteId(),
+            solicitud.getConsignatarioId(),
+            idUsuarioRechaza,
+            "Sistema",
+            solicitud.getTipoSolicitud(),
+            motivo
+        );
+        
+        // Enviar notificación
+        try {
+            notificacionService.notificarRechazo(solicitud, idUsuarioRechaza, motivo);
+        } catch (Exception ex) {
+            log.warn("Error al enviar notificación de rechazo: {}", ex.getMessage());
+        }
+
+        log.info("Solicitud {} rechazada por usuario {}. Motivo: {}", idSolicitud, idUsuarioRechaza, motivo);
+        return solicitud;
+    }
+
+    // ------- CANCELAR SOLICITUD -------
+    @Transactional
+    public Solicitud cancelarSolicitud(Long idSolicitud, Long idUsuarioCancela, String motivo) {
+        log.info("Cancelando solicitud {} por usuario {}", idSolicitud, idUsuarioCancela);
+
+        Solicitud solicitud = obtenerSolicitud(idSolicitud);
+
+        // Solo se pueden cancelar solicitudes en estado PENDIENTE o AUTORIZADO
+        if (!("PENDIENTE".equals(solicitud.getEstado()) || "AUTORIZADO".equals(solicitud.getEstado()))) {
+            throw new IllegalArgumentException("No se pueden cancelar solicitudes en estado " + solicitud.getEstado());
+        }
+        
+        if (motivo == null || motivo.isBlank()) {
+            throw new IllegalArgumentException("El motivo de la cancelación es requerido");
+        }
+
+        solicitud.setEstado("CANCELADO");
+        solicitud.setEstadoId("CANC");
+        solicitud.setObservaciones(motivo);
+        solicitud.setDescripcion("Cancelada - " + motivo);
+
+        int actualizados = megadbpedidoJdbc.update(
+                "UPDATE solicitud_operativa SET estadosolicitudid = ?, fechamodificacion = ?, comentario = ? WHERE solicitudid = ? AND activo = TRUE",
+                "CANC",
+                Timestamp.valueOf(LocalDateTime.now()),
+                solicitud.getDescripcion(),
+                idSolicitud
+        );
+
+        if (actualizados != 1) {
+            throw new IllegalStateException("No fue posible cancelar la solicitud " + idSolicitud);
+        }
+        
+        // Registrar en auditoría
+        auditoriaService.registrarCancelacion(
+            idSolicitud,
+            solicitud.getClienteId(),
+            solicitud.getConsignatarioId(),
+            idUsuarioCancela,
+            "Sistema",
+            solicitud.getTipoSolicitud(),
+            motivo
+        );
+        
+        // Enviar notificación
+        try {
+            notificacionService.notificarCancelacion(solicitud, idUsuarioCancela, motivo);
+        } catch (Exception ex) {
+            log.warn("Error al enviar notificación de cancelación: {}", ex.getMessage());
+        }
+
+        log.info("Solicitud {} cancelada por usuario {}. Motivo: {}", idSolicitud, idUsuarioCancela, motivo);
         return solicitud;
     }
 
@@ -187,7 +361,11 @@ public class SolicitudService {
         if (!rs.next()) {
             throw new IllegalArgumentException("Solicitud no encontrada: " + idSolicitud);
         }
-        return mapearSolicitud(rs);
+        Solicitud solicitud = mapearSolicitud(rs);
+        if (solicitud.getFechaCreacion() == null) {
+            throw new IllegalArgumentException("Datos inválidos para solicitud: " + idSolicitud);
+        }
+        return solicitud;
     }
 
     public Map<String, BigDecimal> obtenerSaldoMonedero(Long clienteId, Long consignatarioId) {
@@ -203,7 +381,7 @@ public class SolicitudService {
 
         if (!rs.next()) {
             megadbpedidoJdbc.update(
-                    "INSERT INTO monedero (clienteid, consignatarioid, monederomodooperacion, monederosaldo, movimientoid, creditosaldo) VALUES (?, ?, 'P', 0, 0, 0)",
+                    "INSERT INTO balance_operativo (clienteid, consignatarioid, monederomodooperacion, monederosaldo, movimientoid, creditosaldo) VALUES (?, ?, 'P', 0, 0, 0)",
                     clienteId,
                     consignatarioId
             );
@@ -313,8 +491,27 @@ public class SolicitudService {
         LocalDateTime now = LocalDateTime.now();
         String descripcionSolicitud = construirDescripcionSolicitud(tipo);
 
-        Long clienteId = dto.getClienteId() != null ? dto.getClienteId() : 0L;
-        Long consignatarioId = dto.getConsignatarioId() != null ? dto.getConsignatarioId() : 0L;
+        // SECURIDAD: Obtener clienteId y consignatarioId del contexto autenticado (JWT)
+        Long clienteId = contextProvider.getClienteId();
+        Long consignatarioId = contextProvider.getConsignatarioId();
+        
+        if (clienteId == null || consignatarioId == null) {
+            throw new IllegalStateException("No se pudo obtener el contexto de cliente/consignatario de la sesión");
+        }
+        
+        // Validar que si el DTO incluye datos, coincidan con el contexto autenticado
+        if (dto.getClienteId() != null && !dto.getClienteId().equals(clienteId)) {
+            throw new IllegalArgumentException(
+                String.format("ClienteId del DTO (%d) no coincide con el contexto autenticado (%d)", 
+                    dto.getClienteId(), clienteId)
+            );
+        }
+        if (dto.getConsignatarioId() != null && !dto.getConsignatarioId().equals(consignatarioId)) {
+            throw new IllegalArgumentException(
+                String.format("ConsignatarioId del DTO (%d) no coincide con el contexto autenticado (%d)", 
+                    dto.getConsignatarioId(), consignatarioId)
+            );
+        }
 
         Long prefacturaId = dto.getPrefacturaId();
         if (prefacturaId == null || prefacturaId <= 0) {
@@ -322,8 +519,8 @@ public class SolicitudService {
         }
 
         Long idPedido = megadbpedidoJdbc.queryForObject(
-                "INSERT INTO pedido (confirmacionid, facturaid, prefacturaid, estadopedidoid, clienteid, consignatarioid, pedidomigrado, movimientoid, pedidotipo, comentarios, fechacreacion, fechamodificacion, activo) " +
-                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING pedidoid",
+                "INSERT INTO solicitud_operativa (confirmacionid, facturaid, prefacturaid, estadosolicitudid, clienteid, consignatarioid, solicitudmigrada, movimientoid, solicitudtipo, comentario, fechacreacion, fechamodificacion, activo) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING solicitudid",
                 Long.class,
                 confirmacionId,
                 -1,
@@ -345,13 +542,16 @@ public class SolicitudService {
         solicitud.setConfirmacionId(confirmacionId);
         solicitud.setTipoSolicitud(tipo);
         solicitud.setEstado("PENDIENTE");
-        solicitud.setMontoTotal(dto.getMontoTotal());
-        solicitud.setIdUsuario(dto.getIdUsuario());
+        solicitud.setEstadoId("NVO");
+        solicitud.setMontoTotal(dto.getMontoTotal() != null ? dto.getMontoTotal() : BigDecimal.ZERO);
+        solicitud.setPrecioBase(calcularPrecioBase(tipo, dto));
+        Long idUsuario = dto.getIdUsuario();
+        solicitud.setIdUsuario(idUsuario != null ? idUsuario : 0L);
         solicitud.setDescripcion(descripcionSolicitud);
         solicitud.setReferencia(dto.getReferencia());
         solicitud.setFechaCreacion(now);
-        solicitud.setClienteId(dto.getClienteId() != null ? dto.getClienteId() : 0);
-        solicitud.setConsignatarioId(dto.getConsignatarioId() != null ? dto.getConsignatarioId() : 0);
+        solicitud.setClienteId(clienteId);
+        solicitud.setConsignatarioId(consignatarioId);
         solicitud.setMigrado(false);
         solicitud.setMovimientoId(-1L);
         solicitud.setActivo(true);
@@ -386,6 +586,24 @@ public class SolicitudService {
         };
     }
 
+    private BigDecimal calcularPrecioBase(String tipo, SolicitudDto dto) {
+        if (tipo == null || tipo.isBlank()) {
+            return BigDecimal.ZERO;
+        }
+        
+        int cantidadDetalles = (dto.getDetalles() != null && !dto.getDetalles().isEmpty()) 
+            ? dto.getDetalles().size() 
+            : 1;
+        
+        return switch (tipo) {
+            case "DISPERSION" -> new BigDecimal("1500.00").multiply(BigDecimal.valueOf(cantidadDetalles));
+            case "STOCK" -> new BigDecimal("120.00").multiply(BigDecimal.valueOf(cantidadDetalles));
+            case "TARJETA" -> new BigDecimal("80.00").multiply(BigDecimal.valueOf(cantidadDetalles));
+            case "ADICIONAL" -> new BigDecimal("150.00").multiply(BigDecimal.valueOf(cantidadDetalles));
+            default -> BigDecimal.ZERO;
+        };
+    }
+
     public Long registrarPrefactura(Long clienteId, Long consignatarioId, BigDecimal total, String servicioId) {
         LocalDateTime now = LocalDateTime.now();
         BigDecimal totalSeguro = total != null ? total : BigDecimal.ZERO;
@@ -397,7 +615,7 @@ public class SolicitudService {
 
         try {
             return megadbpedidoJdbc.queryForObject(
-                    "INSERT INTO prefactura (clienteid, consignatarioid, datosfiscalid, servicioid, total, fechacreacion, fechamodificacion, activo) " +
+                    "INSERT INTO resumen_operativo (clienteid, consignatarioid, datosfiscalid, servicioid, total, fechacreacion, fechamodificacion, activo) " +
                             "VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING prefacturaid",
                     Long.class,
                     clienteSeguro,
@@ -440,10 +658,23 @@ public class SolicitudService {
                 return datosFiscalIdHist;
             }
         } catch (Exception ignored) {
-            // Si no hay histÃ³rico, se falla con mensaje explÃ­cito.
+            // Fallback final abajo.
         }
 
-        throw new IllegalStateException("No se encontrÃ³ datosFiscalId vÃ¡lido para cliente/consignatario");
+        // Fallback: usar el primer datosfiscalid disponible en la base (entorno local/testing).
+        try {
+            Long datosFiscalIdDefault = megadbpedidoJdbc.query(
+                    "SELECT datosfiscalid FROM datosfiscal ORDER BY datosfiscalid LIMIT 1",
+                    rs -> rs.next() ? rs.getLong(1) : null
+            );
+            if (datosFiscalIdDefault != null && datosFiscalIdDefault > 0) {
+                return datosFiscalIdDefault;
+            }
+        } catch (Exception ignored) {
+            // Si ni siquiera hay datosfiscal, lanzar error descriptivo.
+        }
+
+        throw new IllegalStateException("No se encontró datosFiscalId válido para cliente/consignatario");
     }
 
     private Long siguienteConfirmacionId() {
@@ -474,7 +705,12 @@ public class SolicitudService {
         solicitud.setMovimientoId(rs.getLong("movimientoid"));
         solicitud.setTipoSolicitud(rs.getString("pedidotipo"));
         solicitud.setDescripcion(rs.getString("comentarios"));
-        solicitud.setFechaCreacion(rs.getTimestamp("fechacreacion").toLocalDateTime());
+        java.sql.Timestamp ts = rs.getTimestamp("fechacreacion");
+        if (ts != null) {
+            solicitud.setFechaCreacion(ts.toLocalDateTime());
+        } else {
+            solicitud.setFechaCreacion(LocalDateTime.now());
+        }
         solicitud.setActivo(rs.getBoolean("activo"));
         solicitud.setEstadoId(rs.getString("estadopedidoid"));
         BigDecimal monto = rs.getBigDecimal("montototal");
@@ -492,7 +728,12 @@ public class SolicitudService {
         solicitud.setMovimientoId(rs.getLong("movimientoid"));
         solicitud.setTipoSolicitud(rs.getString("pedidotipo"));
         solicitud.setDescripcion(rs.getString("comentarios"));
-        solicitud.setFechaCreacion(rs.getTimestamp("fechacreacion").toLocalDateTime());
+        java.sql.Timestamp ts = rs.getTimestamp("fechacreacion");
+        if (ts != null) {
+            solicitud.setFechaCreacion(ts.toLocalDateTime());
+        } else {
+            solicitud.setFechaCreacion(LocalDateTime.now());
+        }
         solicitud.setActivo(rs.getBoolean("activo"));
         solicitud.setEstadoId(rs.getString("estadopedidoid"));
         BigDecimal monto = rs.getBigDecimal("montototal");

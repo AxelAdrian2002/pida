@@ -3,17 +3,19 @@
 @import "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css";
 
 :root {
+  --brand-primary: #0f766e;
+  --brand-secondary: #334155;
   --efv_rojo: #0f766e;
   --efv_gris_oscuro: #334155;
   --efv_gris: #64748b;
   --efv_gris_claro: #e2e8f0;
   --efv_negro: #000000;
 
-  --bs-primary: var(--efv_rojo);
-  --bs-secondary: var(--efv_gris_oscuro);
+  --bs-primary: var(--brand-primary);
+  --bs-secondary: var(--brand-secondary);
   --bs-light: var(--efv_gris_claro);
-  --bs-dark: var(--efv_gris_oscuro);
-  --bs-link-color: var(--efv_rojo);
+  --bs-dark: var(--brand-secondary);
+  --bs-link-color: var(--brand-primary);
   --bs-link-hover-color: #115e59;
 }
 
@@ -63,8 +65,8 @@ html, body {
 
 .btn-primary {
   color: #fff !important;
-  background-color: var(--efv_gris) !important;
-  border-color: var(--efv_gris) !important;
+  background-color: var(--brand-primary) !important;
+  border-color: var(--brand-primary) !important;
 }
 
 .btn-primary:hover,
@@ -76,16 +78,16 @@ html, body {
 }
 
 .btn-outline-primary {
-  color: var(--efv_rojo) !important;
-  border-color: var(--efv_rojo) !important;
+  color: var(--brand-primary) !important;
+  border-color: var(--brand-primary) !important;
 }
 
 .btn-outline-primary:hover,
 .btn-outline-primary:focus,
 .btn-outline-primary:active {
   color: #fff !important;
-  background-color: var(--efv_rojo) !important;
-  border-color: var(--efv_rojo) !important;
+  background-color: var(--brand-primary) !important;
+  border-color: var(--brand-primary) !important;
 }
 
 .btn-outline-secondary {
@@ -119,11 +121,11 @@ html, body {
 }
 
 .bg-primary {
-  background-color: var(--efv_rojo) !important;
+  background-color: var(--brand-primary) !important;
 }
 
 .bg-dark {
-  background-color: #5f6058 !important;
+  background-color: var(--brand-secondary) !important;
 }
 
 .bg-light {
@@ -131,9 +133,9 @@ html, body {
 }
 
 .text-primary {
-  color: var(--efv_rojo) !important;
+  color: var(--brand-primary) !important;
 }
 
 .badge.text-bg-primary {
-  background-color: var(--efv_rojo) !important;
+  background-color: var(--brand-primary) !important;
 }

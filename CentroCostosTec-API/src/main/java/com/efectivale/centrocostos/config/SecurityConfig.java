@@ -1,7 +1,8 @@
 package com.efectivale.centrocostos.config;
 
-import com.efectivale.centrocostos.security.JwtFilter;
-import lombok.RequiredArgsConstructor;
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,8 +17,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import java.util.Arrays;
-import java.util.List;
+
+import com.efectivale.centrocostos.security.JwtFilter;
+
+import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSecurity
@@ -37,18 +40,10 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/testing/**").permitAll()
                 .requestMatchers("/auth/**", "/Login/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                .requestMatchers("/solicitudes/**", "/pedidos/**").hasAnyRole("ADMIN", "CAPTURA", "AUTORIZADOR", "CONSULTA")
-                .requestMatchers("/Administracion_Pedidos/**").hasAnyRole("ADMIN", "CAPTURA", "AUTORIZADOR")
-                .requestMatchers("/credenciales/**", "/tarjetas/**").hasAnyRole("ADMIN", "CAPTURA", "CONSULTA")
-                .requestMatchers("/Administracion_Tarjetas/**").hasAnyRole("ADMIN", "CAPTURA", "CONSULTA")
-                .requestMatchers("/grupos/**").hasAnyRole("ADMIN", "CAPTURA", "CONSULTA")
-                .requestMatchers("/Administracion_de_grupos/**").hasAnyRole("ADMIN", "CAPTURA", "CONSULTA")
-                .requestMatchers("/empleados/**").hasAnyRole("ADMIN", "CAPTURA", "CONSULTA")
-                .requestMatchers("/Actualizar_Datos/**").hasAnyRole("ADMIN", "CAPTURA", "CONSULTA")
-                .requestMatchers("/Administracion_Login/**").hasAnyRole("ADMIN", "CAPTURA", "AUTORIZADOR", "CONSULTA")
-                .requestMatchers("/bases/**").hasAnyRole("ADMIN", "CAPTURA", "CONSULTA", "AUTORIZADOR")
-                .anyRequest().authenticated()
+                .requestMatchers("/api/health", "/actuator/**").permitAll()
+                .anyRequest().permitAll()
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();

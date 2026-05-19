@@ -1,0 +1,276 @@
+<div class="reportes-container">
+  <h3 class="mb-4">Reportes de Solicitudes</h3>
+
+  <!-- Error Alert -->
+  <div *ngIf="error" class="alert alert-danger alert-dismissible fade show" role="alert">
+    {{ error }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+
+  <!-- Tabs -->
+  <ul class="nav nav-tabs mb-4" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button 
+        class="nav-link" 
+        [class.active]="activeTab === 'resumen'"
+        (click)="cambiarTab('resumen')"
+        type="button">
+        📊 Resumen
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button 
+        class="nav-link" 
+        [class.active]="activeTab === 'auditoria'"
+        (click)="cambiarTab('auditoria')"
+        type="button">
+        📋 Auditoría Detallada
+      </button>
+    </li>
+  </ul>
+
+  <!-- Tab Resumen -->
+  <div *ngIf="activeTab === 'resumen'" class="tab-content">
+    <div *ngIf="cargandoResumen" class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando resumen...</span>
+    </div>
+
+    <div *ngIf="!cargandoResumen && resumen" class="row">
+      <!-- Tarjeta Creadas -->
+      <div class="col-md-6 col-lg-3 mb-3">
+        <div class="card text-center border-info">
+          <div class="card-body">
+            <h6 class="card-title text-muted">Solicitudes Creadas</h6>
+            <h2 class="text-info">{{ resumen.creaciones || 0 }}</h2>
+            <small class="text-muted">{{ resumen.periodo || 'Últimos 30 días' }}</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tarjeta Autorizadas -->
+      <div class="col-md-6 col-lg-3 mb-3">
+        <div class="card text-center border-success">
+          <div class="card-body">
+            <h6 class="card-title text-muted">Autorizadas</h6>
+            <h2 class="text-success">{{ resumen.autorizaciones || 0 }}</h2>
+            <small class="text-muted">{{ obtenerPorcentajeAutorizacion() }}% del total</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tarjeta Rechazadas -->
+      <div class="col-md-6 col-lg-3 mb-3">
+        <div class="card text-center border-danger">
+          <div class="card-body">
+            <h6 class="card-title text-muted">Rechazadas</h6>
+            <h2 class="text-danger">{{ resumen.rechazos || 0 }}</h2>
+            <small class="text-muted">{{ obtenerPorcentajeRechazo() }}% del total</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tarjeta Canceladas -->
+      <div class="col-md-6 col-lg-3 mb-3">
+        <div class="card text-center border-warning">
+          <div class="card-body">
+            <h6 class="card-title text-muted">Canceladas</h6>
+            <h2 class="text-warning">{{ resumen.cancelaciones || 0 }}</h2>
+            <small class="text-muted">Últimos 30 días</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Por Tipo de Solicitud -->
+      <div class="col-12 mt-4">
+        <div class="card">
+          <div class="card-header">
+            <h6 class="mb-0">Solicitudes por Tipo</h6>
+          </div>
+          <div class="card-body">
+            <div *ngIf="resumen.por_tipo_solicitud && Object.keys(resumen.por_tipo_solicitud).length > 0">
+              <table class="table table-sm">
+                <thead>
+                  <tr>
+                    <th>Tipo</th>
+                    <th>Cantidad</th>
+                    <th>Porcentaje</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let item of resumen.por_tipo_solicitud | keyvalue">
+                    <td>{{ item.key }}</td>
+                    <td>{{ item.value }}</td>
+                    <td>
+                      <div class="progress" style="height: 20px;">
+                        <div 
+                          class="progress-bar" 
+                          role="progressbar" 
+                          [style.width]="((item.value / (resumen.creaciones || 1)) * 100) + '%'"
+                          [attr.aria-valuenow]="item.value"
+                          aria-valuemin="0"
+                          [attr.aria-valuemax]="resumen.creaciones || 1">
+                          {{ ((item.value / (resumen.creaciones || 1)) * 100) | number: '1.0-0' }}%
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div *ngIf="!resumen.por_tipo_solicitud || Object.keys(resumen.por_tipo_solicitud).length === 0">
+              <p class="text-muted mb-0">Sin datos disponibles</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Auditoría Detallada -->
+  <div *ngIf="activeTab === 'auditoria'" class="tab-content">
+    <!-- Filtros -->
+    <div class="card mb-4">
+      <div class="card-header">
+        <h6 class="mb-0">Filtros</h6>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-3">
+            <label class="form-label">Fecha Inicio</label>
+            <input type="date" class="form-control" [(ngModel)]="filtros.fechaInicio" />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Fecha Fin</label>
+            <input type="date" class="form-control" [(ngModel)]="filtros.fechaFin" />
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Acción</label>
+            <select class="form-select" [(ngModel)]="filtros.accion">
+              <option value="">Todas</option>
+              <option value="CREAR">Crear</option>
+              <option value="AUTORIZAR">Autorizar</option>
+              <option value="RECHAZAR">Rechazar</option>
+              <option value="CANCELAR">Cancelar</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Tipo Solicitud</label>
+            <select class="form-select" [(ngModel)]="filtros.tipoSolicitud">
+              <option value="">Todos</option>
+              <option value="DISPERSION">Dispersión</option>
+              <option value="STOCK">Stock</option>
+              <option value="TARJETA">Tarjeta</option>
+              <option value="ADICIONAL">Adicional</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">&nbsp;</label>
+            <div class="d-grid">
+              <button class="btn btn-primary btn-sm" (click)="aplicarFiltros()" [disabled]="cargandoAuditoria">
+                Filtrar
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="row mt-2">
+          <div class="col-12">
+            <button class="btn btn-secondary btn-sm" (click)="limpiarFiltros()">
+              Limpiar Filtros
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla Auditoría -->
+    <div *ngIf="cargandoAuditoria" class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando auditoría...</span>
+    </div>
+
+    <div *ngIf="!cargandoAuditoria && auditoria" class="card">
+      <div class="card-header">
+        <h6 class="mb-0">Registros ({{ auditoria.total_cambios || 0 }} encontrados)</h6>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-sm table-hover mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Fecha</th>
+                <th>Acción</th>
+                <th>Tipo</th>
+                <th>Usuario</th>
+                <th>Estado</th>
+                <th>Motivo</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let registro of auditoria.registros">
+                <td>
+                  <small>{{ registro.fecha_cambio | date: 'dd/MM/yyyy HH:mm' }}</small>
+                </td>
+                <td>
+                  <span class="badge"
+                    [ngClass]="{
+                      'bg-info': registro.accion === 'CREAR',
+                      'bg-success': registro.accion === 'AUTORIZAR',
+                      'bg-danger': registro.accion === 'RECHAZAR',
+                      'bg-warning text-dark': registro.accion === 'CANCELAR'
+                    }">
+                    {{ registro.accion }}
+                  </span>
+                </td>
+                <td>
+                  <small>{{ registro.tipo_solicitud }}</small>
+                </td>
+                <td>
+                  <small>{{ registro.usuario_nombre || '-' }}</small>
+                </td>
+                <td>
+                  <small *ngIf="registro.estado_nuevo">
+                    {{ registro.estado_anterior }} → {{ registro.estado_nuevo }}
+                  </small>
+                  <small *ngIf="!registro.estado_nuevo" class="text-muted">-</small>
+                </td>
+                <td>
+                  <small class="text-truncate" [title]="registro.motivo_cambio">
+                    {{ registro.motivo_cambio || '-' }}
+                  </small>
+                </td>
+              </tr>
+              <tr *ngIf="!auditoria.registros || auditoria.registros.length === 0">
+                <td colspan="6" class="text-center text-muted py-3">
+                  No hay registros de auditoría
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .reportes-container {
+    padding: 20px;
+  }
+
+  .card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  }
+
+  .nav-tabs .nav-link {
+    color: #495057;
+    cursor: pointer;
+  }
+
+  .nav-tabs .nav-link.active {
+    color: #0d6efd;
+    border-color: #0d6efd;
+  }
+
+  .progress {
+    background-color: #e9ecef;
+  }
+</style>

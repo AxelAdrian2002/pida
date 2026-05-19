@@ -1,10 +1,15 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './shared/guards/auth.guard';
+import { adminGuard } from './shared/guards/admin.guard';
 
 export const routes: Routes = [
   {
     path: 'login',
     loadComponent: () => import('./pages/login/login.component').then(m => m.LoginComponent)
+  },
+  {
+    path: 'registro-empresa',
+    loadComponent: () => import('./features/registro-empresa/registro-empresa.component').then(m => m.RegistroEmpresaComponent)
   },
   {
     path: '',
@@ -80,6 +85,11 @@ export const routes: Routes = [
       {
         path: 'empleados/:numeroEmpleado/editar',
         loadComponent: () => import('./features/empleados/actualiza-empleado/actualiza-empleado.component').then(m => m.ActualizaEmpleadoComponent)
+      },
+      {
+        path: 'empresa/configuracion',
+        canActivate: [adminGuard],
+        loadComponent: () => import('./features/empresa/empresa-admin.component').then(m => m.EmpresaAdminComponent)
       },
       {
         path: 'cambio-contrasenia',

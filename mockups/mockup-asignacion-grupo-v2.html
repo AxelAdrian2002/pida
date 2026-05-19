@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asignación de Empleados a Grupo - Centro de Costos NOVAHUB</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-light p-4">
+    <div class="container-lg">
+        <div class="mb-4">
+            <h4 class="text-info"><i class="fas fa-user-plus me-2"></i>Asignación de Empleados a Grupo</h4>
+            <small class="text-muted">Grupo: GRP-001 - Centro Logístico Centro</small>
+        </div>
+
+        <!-- Filtro superior -->
+        <div class="card shadow-sm mb-3">
+            <div class="card-body">
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <input class="form-control" placeholder="Buscar en disponibles...">
+                    </div>
+                    <div class="col-md-6">
+                        <input class="form-control" placeholder="Buscar en asignados...">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dos columnas: Disponibles y Asignados -->
+        <div class="row g-3">
+            <!-- Columna Izquierda: Disponibles -->
+            <div class="col-lg-6">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-info text-white">
+                        <i class="fas fa-users me-1"></i>Empleados Disponibles (23)
+                    </div>
+                    <div style="height: 400px; overflow-y: auto;">
+                        <div class="list-group list-group-flush">
+                            <label class="list-group-item d-flex gap-2 py-3">
+                                <input type="checkbox" class="form-check-input mt-1" value="10001">
+                                <div>
+                                    <strong>Andrea Lopez</strong><br>
+                                    <small class="text-muted">EMP-10001 | Coordinadora</small>
+                                </div>
+                            </label>
+                            <label class="list-group-item d-flex gap-2 py-3">
+                                <input type="checkbox" class="form-check-input mt-1" value="10002">
+                                <div>
+                                    <strong>Luis Martinez</strong><br>
+                                    <small class="text-muted">EMP-10002 | Operario</small>
+                                </div>
+                            </label>
+                            <label class="list-group-item d-flex gap-2 py-3">
+                                <input type="checkbox" class="form-check-input mt-1" value="10003">
+                                <div>
+                                    <strong>Carla Rodriguez</strong><br>
+                                    <small class="text-muted">EMP-10003 | Administrador</small>
+                                </div>
+                            </label>
+                            <label class="list-group-item d-flex gap-2 py-3">
+                                <input type="checkbox" class="form-check-input mt-1" value="10004">
+                                <div>
+                                    <strong>José Garcia</strong><br>
+                                    <small class="text-muted">EMP-10004 | Supervisor</small>
+                                </div>
+                            </label>
+                            <label class="list-group-item d-flex gap-2 py-3">
+                                <input type="checkbox" class="form-check-input mt-1" value="10005">
+                                <div>
+                                    <strong>Patricia Sanchez</strong><br>
+                                    <small class="text-muted">EMP-10005 | Operaria</small>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Columna Derecha: Asignados -->
+            <div class="col-lg-6">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-success text-white">
+                        <i class="fas fa-check-circle me-1"></i>Empleados Asignados (5)
+                    </div>
+                    <div style="height: 400px; overflow-y: auto;">
+                        <div class="list-group list-group-flush">
+                            <div class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                <div>
+                                    <strong>Juan Pérez</strong><br>
+                                    <small class="text-muted">EMP-10010 | Coordinador</small>
+                                </div>
+                                <button class="btn btn-sm btn-outline-danger" title="Quitar">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                <div>
+                                    <strong>María López</strong><br>
+                                    <small class="text-muted">EMP-10011 | Supervisor</small>
+                                </div>
+                                <button class="btn btn-sm btn-outline-danger" title="Quitar">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                <div>
+                                    <strong>Carlos García</strong><br>
+                                    <small class="text-muted">EMP-10012 | Operario</small>
+                                </div>
+                                <button class="btn btn-sm btn-outline-danger" title="Quitar">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="mt-4 d-flex gap-2">
+            <button class="btn btn-primary flex-grow-1">
+                <i class="fas fa-arrow-right me-1"></i> Asignar Seleccionados
+            </button>
+            <button class="btn btn-outline-secondary flex-grow-1">
+                <i class="fas fa-undo me-1"></i> Asignar Todos
+            </button>
+            <button class="btn btn-success">
+                <i class="fas fa-save me-1"></i> Guardar Cambios
+            </button>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

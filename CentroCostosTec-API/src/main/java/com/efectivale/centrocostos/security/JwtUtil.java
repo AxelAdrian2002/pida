@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import java.security.Key;
 import java.util.Date;
+import java.util.List;
 
 @Component
 public class JwtUtil {
@@ -36,7 +37,8 @@ public class JwtUtil {
      */
     public String generateToken(String username, String rol,
                                 long idUsuario, long clienteId, long consignatarioId,
-                                String corporativoId, String centroId) {
+                    String corporativoId, String centroId,
+                    List<String> permisos) {
         return Jwts.builder()
                 .setSubject(username)
                 .claim("rol",             rol)
@@ -45,6 +47,7 @@ public class JwtUtil {
                 .claim("consignatarioId", consignatarioId)
                 .claim("corporativoId",   corporativoId)
                 .claim("centroId",        centroId)
+            .claim("permisos",        permisos)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
@@ -80,6 +83,17 @@ public class JwtUtil {
 
     public String getCentroIdFromToken(String token) {
         return (String) parseClaims(token).get("centroId");
+    }
+
+    public List<String> getPermisosFromToken(String token) {
+        Object raw = parseClaims(token).get("permisos");
+        if (raw instanceof List<?> list) {
+            return list.stream()
+                .filter(item -> item != null)
+                .map(String::valueOf)
+                .toList();
+        }
+        return List.of();
     }
 
     public boolean validateToken(String token) {

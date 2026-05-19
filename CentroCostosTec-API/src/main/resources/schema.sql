@@ -36,6 +36,7 @@ DROP TABLE IF EXISTS domicilio CASCADE;
 DROP TABLE IF EXISTS bitacorareposicion CASCADE;
 DROP TABLE IF EXISTS tarjeta CASCADE;
 DROP TABLE IF EXISTS parametros CASCADE;
+DROP TABLE IF EXISTS tenant_permiso_usuario CASCADE;
 DROP TABLE IF EXISTS grupo_empleado_tec CASCADE;
 DROP TABLE IF EXISTS direccionesgrupo CASCADE;
 DROP TABLE IF EXISTS detalledirecciones CASCADE;
@@ -52,7 +53,24 @@ CREATE TABLE IF NOT EXISTS empresa_operativa (
     empresa_id BIGSERIAL PRIMARY KEY,
     codigo_empresa VARCHAR(20) NOT NULL UNIQUE,
     nombre_empresa VARCHAR(180) NOT NULL,
-    activa BOOLEAN NOT NULL DEFAULT TRUE
+    activa BOOLEAN NOT NULL DEFAULT TRUE,
+    color_primario VARCHAR(20),
+    color_secundario VARCHAR(20),
+    logo_url VARCHAR(500),
+    razon_social VARCHAR(180),
+    rfc VARCHAR(20),
+    email_contacto VARCHAR(120),
+    telefono_contacto VARCHAR(30),
+    sitio_web VARCHAR(200),
+    calle VARCHAR(150),
+    numero_exterior VARCHAR(30),
+    numero_interior VARCHAR(30),
+    colonia VARCHAR(120),
+    municipio VARCHAR(120),
+    estado VARCHAR(120),
+    pais VARCHAR(80),
+    codigo_postal VARCHAR(10),
+    fecha_modificacion TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS unidad_operativa (
@@ -78,8 +96,29 @@ CREATE TABLE IF NOT EXISTS usuario_interno (
     usuariofechacreacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     usuariofechamodificacion TIMESTAMP,
     usuariofechaexpirapwd TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    requiere_cambio_password BOOLEAN NOT NULL DEFAULT FALSE,
+    email_verificado BOOLEAN NOT NULL DEFAULT TRUE,
     bitacoraid INTEGER NOT NULL DEFAULT 0,
     UNIQUE (corporativoid, usuariousr)
+);
+
+CREATE TABLE IF NOT EXISTS usuario_verificacion (
+    verificacion_id BIGSERIAL PRIMARY KEY,
+    usuarioid BIGINT NOT NULL REFERENCES usuario_interno(usuarioid) ON DELETE CASCADE,
+    correo VARCHAR(120) NOT NULL,
+    token VARCHAR(120) NOT NULL UNIQUE,
+    fecha_expiracion TIMESTAMP NOT NULL,
+    usado BOOLEAN NOT NULL DEFAULT FALSE,
+    fecha_creacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    fecha_uso TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS usuario_perfil (
+    usuarioid BIGINT PRIMARY KEY REFERENCES usuario_interno(usuarioid) ON DELETE CASCADE,
+    curp VARCHAR(30),
+    rfc VARCHAR(20),
+    foto_url VARCHAR(300),
+    fecha_modificacion TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS colaborador (
@@ -163,6 +202,29 @@ CREATE TABLE IF NOT EXISTS bitacora_credencial (
     usuario_operacion VARCHAR(50),
     observacion VARCHAR(300),
     fecha_operacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS tenant_audit_log (
+    audit_id BIGSERIAL PRIMARY KEY,
+    fecha_evento TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    modulo VARCHAR(80) NOT NULL,
+    accion VARCHAR(80) NOT NULL,
+    detalle VARCHAR(1000),
+    usuarioid BIGINT,
+    username VARCHAR(80),
+    corporativoid VARCHAR(20),
+    clienteid BIGINT,
+    consignatarioid BIGINT
+);
+
+CREATE TABLE IF NOT EXISTS tenant_permiso_usuario (
+    permiso_id BIGSERIAL PRIMARY KEY,
+    corporativoid VARCHAR(20) NOT NULL,
+    usuarioid BIGINT NOT NULL REFERENCES usuario_interno(usuarioid) ON DELETE CASCADE,
+    permiso VARCHAR(80) NOT NULL,
+    permitido BOOLEAN NOT NULL DEFAULT TRUE,
+    fecha_modificacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (corporativoid, usuarioid, permiso)
 );
 
 CREATE TABLE IF NOT EXISTS domicilio_fiscal (
@@ -262,6 +324,30 @@ CREATE TABLE IF NOT EXISTS detalle_resumen_operativo (
     cantidad BIGINT NOT NULL DEFAULT 1,
     subtotal NUMERIC(14,2) NOT NULL DEFAULT 0
 );
+
+CREATE TABLE IF NOT EXISTS solicitud_auditoria (
+    id BIGSERIAL PRIMARY KEY,
+    solicitud_id BIGINT NOT NULL REFERENCES solicitud_operativa(solicitudid) ON DELETE CASCADE,
+    cliente_id BIGINT NOT NULL,
+    consignatario_id BIGINT NOT NULL,
+    usuario_id BIGINT,
+    usuario_nombre VARCHAR(255),
+    accion VARCHAR(50) NOT NULL,
+    tipo_solicitud VARCHAR(50),
+    estado_anterior VARCHAR(50),
+    estado_nuevo VARCHAR(50),
+    motivo_cambio TEXT,
+    datos_anteriores TEXT,
+    datos_nuevos TEXT,
+    fecha_cambio TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    direccion_ip VARCHAR(45),
+    activo BOOLEAN DEFAULT TRUE
+);
+
+CREATE INDEX IF NOT EXISTS idx_solicitud_auditoria_solicitud_id ON solicitud_auditoria(solicitud_id);
+CREATE INDEX IF NOT EXISTS idx_solicitud_auditoria_cliente_consignatario ON solicitud_auditoria(cliente_id, consignatario_id);
+CREATE INDEX IF NOT EXISTS idx_solicitud_auditoria_fecha ON solicitud_auditoria(fecha_cambio);
+CREATE INDEX IF NOT EXISTS idx_solicitud_auditoria_accion ON solicitud_auditoria(accion);
 
 -- Vistas de compatibilidad para evitar romper el backend actual.
 CREATE OR REPLACE VIEW corporativos AS

@@ -92,6 +92,21 @@ export class AuthService {
     return this.getUser()?.centroId ?? null;
   }
 
+  requiresPasswordChange(): boolean {
+    const u = this.getUser() as any;
+    return Boolean(u?.requiereCambioPassword);
+  }
+
+  markPasswordChanged(): void {
+    const user = this.getUser();
+    if (!user) {
+      return;
+    }
+    const updated = { ...user, requiereCambioPassword: false };
+    sessionStorage.setItem(this.USER_KEY, JSON.stringify(updated));
+    localStorage.setItem(this.USER_KEY, JSON.stringify(updated));
+  }
+
   getJerarquia(): string {
     const u = this.getUser() as any;
     return String(u?.jerarquia ?? u?.rs_jerarquia_or ?? u?.rs_jerarquia ?? 'OR');

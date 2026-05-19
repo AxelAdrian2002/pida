@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Solicitud de Apoyo Económico - Centro de Costos NOVAHUB</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+    </style>
+</head>
+<body>
+    <div class="p-4">
+        <!-- Header -->
+        <h5 class="mb-4"><i class="fas fa-file-invoice-dollar me-2 text-primary"></i>Crear Solicitud de Apoyo Económico</h5>
+
+        <!-- Botones de Acción -->
+        <div class="card shadow-sm mb-3">
+            <div class="card-body d-flex flex-wrap gap-2">
+                <button class="btn btn-outline-primary">
+                    Descargar Plantilla
+                </button>
+                <label class="btn btn-outline-secondary mb-0">
+                    Cargar archivo
+                    <input type="file" accept=".xlsx" hidden>
+                </label>
+                <button class="btn btn-primary" disabled>
+                    Procesar
+                </button>
+                <button class="btn btn-outline-danger">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+
+        <!-- Mensajes -->
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>Selecciona un archivo Excel (.xlsx) con los datos de la solicitud
+        </div>
+
+        <!-- Nota Importante -->
+        <div class="card border-danger mb-3">
+            <div class="card-body py-3">
+                <div class="text-danger fw-semibold small">Favor de considerar los siguientes puntos para procesar correctamente la solicitud.</div>
+                <ul class="small mb-0 mt-2">
+                    <li>Para generar esta solicitud, verifica que el archivo corresponda al periodo actual.</li>
+                    <li>El campo número de empleado es opcional en la plantilla.</li>
+                    <li>El precio base se calcula automáticamente según el tipo de solicitud.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Resultado (se muestra después de procesar) -->
+        <div class="card shadow-sm" style="display: none;">
+            <div class="card-header">Prefactura</div>
+            <div class="card-body">
+                <div class="row g-2">
+                    <div class="col-md-4"><strong>Tipo:</strong> DISPERSION</div>
+                    <div class="col-md-4"><strong>Cliente:</strong> 1001</div>
+                    <div class="col-md-4"><strong>Consignatario:</strong> 2001</div>
+                    <div class="col-md-4"><strong>Monto:</strong> $3,000.00</div>
+                    <div class="col-md-4"><strong>Precio Base:</strong> $3,000.00</div>
+                    <div class="col-md-8"><strong>Descripción:</strong> Solicitud de apoyo económico procesada</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

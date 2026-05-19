@@ -4,6 +4,26 @@ INSERT INTO empresa_operativa (codigo_empresa, nombre_empresa, activa)
 VALUES ('NOVA01', 'NOVAHUB GESTION INTERNA SA DE CV', TRUE)
 ON CONFLICT (codigo_empresa) DO NOTHING;
 
+UPDATE empresa_operativa
+SET color_primario = '#0d6efd',
+    color_secundario = '#0b2545',
+    logo_url = 'https://dummyimage.com/280x80/0b2545/ffffff.png&text=NOVAHUB',
+    razon_social = 'NOVAHUB GESTION INTERNA SA DE CV',
+    rfc = 'NGI260101AAA',
+    email_contacto = 'contacto@novahub.local',
+    telefono_contacto = '5551000000',
+    sitio_web = 'https://novahub.local',
+    calle = 'Av. Innovacion',
+    numero_exterior = '100',
+    numero_interior = 'Piso 3',
+    colonia = 'Centro',
+    municipio = 'Cuauhtemoc',
+    estado = 'CDMX',
+    pais = 'Mexico',
+    codigo_postal = '01000',
+    fecha_modificacion = NOW()
+WHERE codigo_empresa = 'NOVA01';
+
 INSERT INTO unidad_operativa (codigo_unidad, codigo_empresa, clienteid, consignatarioid, activa)
 VALUES ('OPER-100', 'NOVA01', 1001, 2001, TRUE)
 ON CONFLICT (codigo_empresa, codigo_unidad) DO NOTHING;
@@ -11,13 +31,72 @@ ON CONFLICT (codigo_empresa, codigo_unidad) DO NOTHING;
 INSERT INTO usuario_interno (
     usuariousr, usuarionombre, usuariopwd, usuariocorreo, usuarioactivo,
     perfilid, corporativoid, centroid, usuariofechacreacion, usuariofechamodificacion,
-    usuariofechaexpirapwd, bitacoraid
+    usuariofechaexpirapwd, requiere_cambio_password, email_verificado, bitacoraid
 )
 VALUES
-('admin', 'Administrador NOVAHUB', '0192023a7bbd73250516f069df18b500', 'admin@novahub.local', TRUE, 1, 'NOVA01', 'OPER-100', NOW(), NOW(), NOW() + INTERVAL '90 days', 0),
-('captura', 'Analista Operativo', '0192023a7bbd73250516f069df18b500', 'captura@novahub.local', TRUE, 2, 'NOVA01', 'OPER-100', NOW(), NOW(), NOW() + INTERVAL '90 days', 0),
-('consulta', 'Supervisor Operativo', '0192023a7bbd73250516f069df18b500', 'consulta@novahub.local', TRUE, 3, 'NOVA01', 'OPER-100', NOW(), NOW(), NOW() + INTERVAL '90 days', 0)
+('admin', 'Administrador NOVAHUB', '0192023a7bbd73250516f069df18b500', 'admin@novahub.local', TRUE, 1, 'NOVA01', 'OPER-100', NOW(), NOW(), NOW() + INTERVAL '90 days', FALSE, TRUE, 0),
+('captura', 'Analista Operativo', '0192023a7bbd73250516f069df18b500', 'captura@novahub.local', TRUE, 2, 'NOVA01', 'OPER-100', NOW(), NOW(), NOW() + INTERVAL '90 days', FALSE, TRUE, 0),
+('consulta', 'Supervisor Operativo', '0192023a7bbd73250516f069df18b500', 'consulta@novahub.local', TRUE, 3, 'NOVA01', 'OPER-100', NOW(), NOW(), NOW() + INTERVAL '90 days', FALSE, TRUE, 0)
 ON CONFLICT (corporativoid, usuariousr) DO NOTHING;
+
+INSERT INTO usuario_perfil (usuarioid, curp, rfc, foto_url, fecha_modificacion)
+SELECT usuarioid,
+       CASE usuariousr
+           WHEN 'admin' THEN 'LOPA900101HDFRNR01'
+           WHEN 'captura' THEN 'MARD920202MDFRZS02'
+           ELSE 'CONS930303HDFLNS03'
+       END,
+       CASE usuariousr
+           WHEN 'admin' THEN 'NGI260101AAA'
+           WHEN 'captura' THEN 'MARD9202021A1'
+           ELSE 'CONS9303032B2'
+       END,
+       'https://dummyimage.com/128x128/ced4da/1f2937.png&text=' || upper(left(usuariousr, 1)),
+       NOW()
+FROM usuario_interno
+WHERE usuariousr IN ('admin', 'captura', 'consulta')
+ON CONFLICT (usuarioid) DO NOTHING;
+
+INSERT INTO tenant_permiso_usuario (corporativoid, usuarioid, permiso, permitido, fecha_modificacion)
+SELECT u.corporativoid, u.usuarioid, p.permiso, TRUE, NOW()
+FROM usuario_interno u
+CROSS JOIN LATERAL (
+    VALUES
+        ('EMPRESA_CONFIG_VER'),
+        ('EMPRESA_CONFIG_EDITAR'),
+        ('EMPLEADOS_IMPORTAR'),
+        ('GRUPOS_GESTIONAR'),
+        ('GRUPOS_ASIGNAR'),
+        ('GRUPOS_REPORTE'),
+        ('CREDENCIALES_OPERAR'),
+        ('SOLICITUDES_AUTORIZAR')
+) p(permiso)
+WHERE u.usuariousr = 'admin'
+ON CONFLICT (corporativoid, usuarioid, permiso) DO NOTHING;
+
+INSERT INTO tenant_permiso_usuario (corporativoid, usuarioid, permiso, permitido, fecha_modificacion)
+SELECT u.corporativoid, u.usuarioid, p.permiso, TRUE, NOW()
+FROM usuario_interno u
+CROSS JOIN LATERAL (
+    VALUES
+        ('GRUPOS_GESTIONAR'),
+        ('GRUPOS_ASIGNAR'),
+        ('GRUPOS_REPORTE'),
+        ('CREDENCIALES_OPERAR')
+) p(permiso)
+WHERE u.usuariousr = 'captura'
+ON CONFLICT (corporativoid, usuarioid, permiso) DO NOTHING;
+
+INSERT INTO tenant_permiso_usuario (corporativoid, usuarioid, permiso, permitido, fecha_modificacion)
+SELECT u.corporativoid, u.usuarioid, p.permiso, TRUE, NOW()
+FROM usuario_interno u
+CROSS JOIN LATERAL (
+    VALUES
+        ('SOLICITUDES_AUTORIZAR'),
+        ('GRUPOS_REPORTE')
+) p(permiso)
+WHERE u.usuariousr = 'consulta'
+ON CONFLICT (corporativoid, usuarioid, permiso) DO NOTHING;
 
 INSERT INTO colaborador (tnuec, tnoem, tappa, tapma, tmail, ttele, tnucl, tnuco, tgrup, tbist, tbife)
 VALUES
@@ -77,6 +156,11 @@ INSERT INTO unidad_fiscal (clienteid, consignatarioid, datosfiscalid)
 VALUES (1001, 2001, 1)
 ON CONFLICT (clienteid, consignatarioid) DO NOTHING;
 
+-- Token de prueba usa clienteid=1 / consignatarioid=1
+INSERT INTO unidad_fiscal (clienteid, consignatarioid, datosfiscalid)
+VALUES (1, 1, 1)
+ON CONFLICT (clienteid, consignatarioid) DO NOTHING;
+
 INSERT INTO servicio_catalogo (productoid, nombre)
 VALUES
 (1, 'Solicitud de Apoyo Economico'),
@@ -125,7 +209,7 @@ ON CONFLICT (codigo_empresa, codigo_unidad) DO NOTHING;
 INSERT INTO usuario_interno (
     usuariousr, usuarionombre, usuariopwd, usuariocorreo, usuarioactivo,
     perfilid, corporativoid, centroid, usuariofechacreacion, usuariofechamodificacion,
-    usuariofechaexpirapwd, bitacoraid
+    usuariofechaexpirapwd, requiere_cambio_password, email_verificado, bitacoraid
 )
 SELECT
     'operador' || lpad(gs::text, 2, '0'),
@@ -136,7 +220,7 @@ SELECT
     CASE WHEN gs % 3 = 0 THEN 3 WHEN gs % 2 = 0 THEN 2 ELSE 1 END,
     'NOVA01',
     CASE WHEN gs % 5 = 0 THEN 'OPER-200' ELSE 'OPER-100' END,
-    NOW(), NOW(), NOW() + INTERVAL '90 days', 0
+    NOW(), NOW(), NOW() + INTERVAL '90 days', FALSE, TRUE, 0
 FROM generate_series(1, 20) gs
 ON CONFLICT (corporativoid, usuariousr) DO NOTHING;
 

@@ -168,6 +168,25 @@ export class SolicitudService {
     return this.http.post<ApiResponse<Solicitud>>(`${this.API}/aprobacion`, null, { params });
   }
 
+  // ------- RECHAZAR SOLICITUD -------
+  rechazar(id: number, motivo: string, idUsuarioRechaza?: number): Observable<ApiResponse<Solicitud>> {
+    let params = new HttpParams().set('motivo', motivo);
+    if (idUsuarioRechaza) params = params.set('idUsuarioRechaza', idUsuarioRechaza);
+    return this.http.put<ApiResponse<Solicitud>>(`${this.API}/${id}/rechazar`, null, { params });
+  }
+
+  // ------- CANCELAR SOLICITUD -------
+  cancelar(id: number, motivo: string, idUsuarioCancela?: number): Observable<ApiResponse<Solicitud>> {
+    let params = new HttpParams().set('motivo', motivo);
+    if (idUsuarioCancela) params = params.set('idUsuarioCancela', idUsuarioCancela);
+    return this.http.put<ApiResponse<Solicitud>>(`${this.API}/${id}/cancelar`, null, { params });
+  }
+
+  // ------- OBTENER HISTORIAL DE AUDITORÍA -------
+  obtenerHistorial(id: number): Observable<ApiResponse<any[]>> {
+    return this.http.get<ApiResponse<any[]>>(`/api/reportes/solicitudes/${id}/historial`);
+  }
+
   recuperarVistaPrefacturaGuardado(pedidoId?: number, prefacturaId?: number): Observable<ApiResponse<any>> {
     let params = new HttpParams();
     if (pedidoId != null) {

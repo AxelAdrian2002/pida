@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Solicitud de Apoyo Económico - NOVAHUB</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        .navbar {
+            background: linear-gradient(135deg, #0d6efd, #0056b3);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .form-section {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .section-header {
+            font-weight: 600;
+            color: #0d6efd;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        .detalles-table {
+            margin-top: 16px;
+        }
+        .btn-add-row {
+            background: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            color: #0d6efd;
+            padding: 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            display: inline-block;
+            width: 100%;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        .btn-add-row:hover {
+            background: #e7f1ff;
+            border-color: #0d6efd;
+            text-decoration: none;
+        }
+        .row-detalle {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+        }
+        .badge-custom {
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 0.4rem 0.8rem;
+        }
+        .resumen-box {
+            background: linear-gradient(135deg, rgba(13, 110, 253, 0.05), rgba(13, 110, 253, 0.1));
+            border-left: 4px solid #0d6efd;
+            padding: 16px;
+            border-radius: 6px;
+            margin-top: 16px;
+        }
+        .resumen-valor {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0d6efd;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark sticky-top">
+        <div class="container-fluid">
+            <span class="navbar-brand mb-0 h5">
+                <i class="fas fa-arrow-left me-2" style="cursor: pointer;"></i>NOVAHUB - Centro de Costos
+            </span>
+            <span class="text-white-50 small">Unidad: <strong>OPER-100</strong></span>
+        </div>
+    </nav>
+
+    <div class="container-fluid p-4" style="max-width: 1000px;">
+        <!-- Header -->
+        <div class="mb-4">
+            <h3 class="mb-2 text-primary">
+                <i class="fas fa-money-bill-wave me-2"></i>Crear Solicitud de Apoyo Económico
+            </h3>
+            <p class="text-muted">Dispersión de saldo a empleados - Precio base: <strong>$1,500 MXN por empleado</strong></p>
+        </div>
+
+        <form>
+            <!-- Información General -->
+            <div class="form-section">
+                <div class="section-header">
+                    <i class="fas fa-info-circle me-2"></i>Información General
+                </div>
+                
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Referencia <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" value="REF-DISP-2605" required>
+                        <small class="text-muted">Identificador único para esta solicitud</small>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label">Descripción <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" value="Dispersión mensual de apoyo económico" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Centro de Costos</label>
+                        <input type="text" class="form-control" value="OPER-100" disabled>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Tipo de Solicitud</label>
+                        <input type="text" class="form-control" value="DISPERSION" disabled>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detalles de Empleados -->
+            <div class="form-section">
+                <div class="section-header">
+                    <i class="fas fa-users me-2"></i>Detalles de Empleados
+                </div>
+
+                <!-- Fila 1 -->
+                <div class="row-detalle">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-2">
+                            <label class="form-label small">Número Empleado</label>
+                            <input type="text" class="form-control" value="10001" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small">Nombre</label>
+                            <input type="text" class="form-control" value="Andrea Lopez" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small">Monto</label>
+                            <input type="number" class="form-control" step="0.01" value="1500.00" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small">Descripción</label>
+                            <input type="text" class="form-control" value="Apoyo económico mayo 2026">
+                        </div>
+                        <div class="col-md-1">
+                            <button type="button" class="btn btn-outline-danger btn-sm w-100">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fila 2 -->
+                <div class="row-detalle">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-2">
+                            <label class="form-label small">Número Empleado</label>
+                            <input type="text" class="form-control" value="10002" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small">Nombre</label>
+                            <input type="text" class="form-control" value="Luis Martinez" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small">Monto</label>
+                            <input type="number" class="form-control" step="0.01" value="1500.00" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small">Descripción</label>
+                            <input type="text" class="form-control" value="Apoyo económico mayo 2026">
+                        </div>
+                        <div class="col-md-1">
+                            <button type="button" class="btn btn-outline-danger btn-sm w-100">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botón Agregar -->
+                <a href="#" class="btn-add-row">
+                    <i class="fas fa-plus me-2"></i>Agregar otro empleado
+                </a>
+            </div>
+
+            <!-- Resumen -->
+            <div class="form-section">
+                <div class="section-header">
+                    <i class="fas fa-calculator me-2"></i>Resumen
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="resumen-box">
+                            <div class="text-muted small mb-1">Monto Total de Dispersión</div>
+                            <div class="resumen-valor">$3,000.00</div>
+                            <small class="text-muted">Suma de todos los montos</small>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="resumen-box">
+                            <div class="text-muted small mb-1">Precio Base Calculado</div>
+                            <div class="resumen-valor">$3,000.00</div>
+                            <small class="text-muted">2 empleados × $1,500 = $3,000</small>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="alert alert-info mb-0">
+                            <i class="fas fa-lightbulb me-2"></i>
+                            <strong>Información:</strong> El precio base se calcula automáticamente según el tipo de solicitud y cantidad de empleados/tarjetas. Este monto se deducirá del saldo de monedero disponible ($150,000).
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Acciones -->
+            <div class="form-section">
+                <div class="d-flex gap-2 justify-content-between">
+                    <button type="button" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-2"></i>Cancelar
+                    </button>
+                    <div>
+                        <button type="button" class="btn btn-outline-primary me-2">
+                            <i class="fas fa-save me-2"></i>Guardar como borrador
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane me-2"></i>Crear solicitud
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

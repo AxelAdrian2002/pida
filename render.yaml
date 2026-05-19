@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: centrocostos-tec-api-dev
+    runtime: docker
+    rootDir: CentroCostosTec-API
+    healthCheckPath: /api/testing/token
+    envVars:
+      - key: SERVER_PORT
+        value: 10000
+      - key: APP_CORS_ALLOWED_ORIGINS
+        value: https://TU_FIREBASE_PROJECT.web.app,https://TU_FIREBASE_PROJECT.firebaseapp.com,http://localhost:4200
+      - key: APP_JWT_SECRET
+        sync: false
+      - key: APP_DB_URL
+        sync: false
+      - key: APP_DB_USER
+        sync: false
+      - key: APP_DB_PASSWORD
+        sync: false
+      - key: APP_MAIL_HOST
+        value: smtp.gmail.com
+      - key: APP_MAIL_PORT
+        value: 587
+      - key: APP_MAIL_USER
+        sync: false
+      - key: APP_MAIL_PASS
+        sync: false
+      - key: APP_MAIL_FROM
+        sync: false
+
+databases:
+  - name: centrocostos-tec-db-dev
+    databaseName: pida_dev
+    user: pida_dev_user

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta de Solicitudes - Centro de Costos NOVAHUB</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+    </style>
+</head>
+<body>
+    <div class="p-4">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="mb-0"><i class="fas fa-list me-2 text-primary"></i>Consulta de Solicitudes Internas</h5>
+            <button class="btn btn-success btn-sm" type="button">
+                <i class="fas fa-check-circle me-1"></i>Aprobar solicitudes
+            </button>
+        </div>
+
+        <!-- Filtros -->
+        <div class="card shadow-sm mb-3">
+            <div class="card-body">
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label">Estado</label>
+                        <select class="form-select">
+                            <option value="">Todos</option>
+                            <option selected>PENDIENTE</option>
+                            <option>AUTORIZADO</option>
+                            <option>RECHAZADO</option>
+                            <option>CANCELADO</option>
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <button class="btn btn-outline-primary">
+                            <i class="fas fa-search me-1"></i>Buscar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla de Solicitudes -->
+        <div class="card shadow-sm">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Tipo</th>
+                            <th>Descripción</th>
+                            <th>Monto</th>
+                            <th>Precio Base</th>
+                            <th>Estado</th>
+                            <th>Fecha</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>#SOL-001</td>
+                            <td><span class="badge bg-secondary">DISPERSION</span></td>
+                            <td>Apoyo económico mayo</td>
+                            <td>$3,000.00</td>
+                            <td>$3,000.00</td>
+                            <td><span class="badge bg-warning text-dark">PENDIENTE</span></td>
+                            <td>15/05/2026</td>
+                        </tr>
+                        <tr>
+                            <td>#SOL-002</td>
+                            <td><span class="badge bg-secondary">STOCK</span></td>
+                            <td>Reposición tarjeta dañada</td>
+                            <td>$240.00</td>
+                            <td>$240.00</td>
+                            <td><span class="badge bg-success">AUTORIZADO</span></td>
+                            <td>14/05/2026</td>
+                        </tr>
+                        <tr>
+                            <td>#SOL-003</td>
+                            <td><span class="badge bg-secondary">TARJETA</span></td>
+                            <td>Nueva asignación OPER-100</td>
+                            <td>$80.00</td>
+                            <td>$80.00</td>
+                            <td><span class="badge bg-success">AUTORIZADO</span></td>
+                            <td>13/05/2026</td>
+                        </tr>
+                        <tr>
+                            <td>#SOL-004</td>
+                            <td><span class="badge bg-secondary">ADICIONAL</span></td>
+                            <td>Asignación adicional por rol</td>
+                            <td>$150.00</td>
+                            <td>$150.00</td>
+                            <td><span class="badge bg-danger">RECHAZADO</span></td>
+                            <td>12/05/2026</td>
+                        </tr>
+                        <tr>
+                            <td>#SOL-005</td>
+                            <td><span class="badge bg-secondary">DISPERSION</span></td>
+                            <td>Pago de nómina mensual</td>
+                            <td>$12,000.00</td>
+                            <td>$6,000.00</td>
+                            <td><span class="badge bg-warning text-dark">PENDIENTE</span></td>
+                            <td>15/05/2026</td>
+                        </tr>
+                        <tr>
+                            <td>#SOL-006</td>
+                            <td><span class="badge bg-secondary">STOCK</span></td>
+                            <td>Reposición de stock tarjetas</td>
+                            <td>$480.00</td>
+                            <td>$480.00</td>
+                            <td><span class="badge bg-warning text-dark">PENDIENTE</span></td>
+                            <td>15/05/2026</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- Paginación -->
+            <div class="card-footer d-flex justify-content-between align-items-center">
+                <small>Página 1 de 8</small>
+                <div class="btn-group">
+                    <button class="btn btn-sm btn-outline-secondary" disabled>Anterior</button>
+                    <button class="btn btn-sm btn-outline-secondary">Siguiente</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

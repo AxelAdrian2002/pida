@@ -25,16 +25,19 @@ public class CredencialService {
     private final CredencialBitacoraRepository bitacoraRepository;
     private final JdbcTemplate jdbcTemplate;
     private final ContextProvider contextProvider;
+    private final TenantAuditService tenantAuditService;
 
     public CredencialService(
             CredencialRepository credencialRepository,
             CredencialBitacoraRepository bitacoraRepository,
             @Qualifier("pddespensaJdbc") JdbcTemplate jdbcTemplate,
-            ContextProvider contextProvider) {
+            ContextProvider contextProvider,
+            TenantAuditService tenantAuditService) {
         this.credencialRepository = credencialRepository;
         this.bitacoraRepository = bitacoraRepository;
         this.jdbcTemplate = jdbcTemplate;
         this.contextProvider = contextProvider;
+        this.tenantAuditService = tenantAuditService;
     }
 
     // ------- CONSULTA CON FILTROS -------
@@ -63,7 +66,18 @@ public class CredencialService {
     }
 
     public List<CredencialBitacora> obtenerBitacora(Long idCredencial) {
-        return bitacoraRepository.findByIdCredencialOrderByFechaOperacionDesc(idCredencial);
+        Long clienteId = contextProvider.getClienteId();
+        Long consignatarioId = contextProvider.getConsignatarioId();
+
+        if (clienteId == null || consignatarioId == null) {
+            throw new IllegalStateException("No se pudo obtener el contexto de la sesión");
+        }
+
+        return bitacoraRepository.findByIdCredencialAndTenantOrderByFechaOperacionDesc(
+            idCredencial,
+            clienteId,
+            consignatarioId
+        );
     }
 
     // ------- ACTIVAR CREDENCIAL -------
@@ -85,6 +99,12 @@ public class CredencialService {
                 credencial.getParametrosId()
         );
         registrarBitacora(credencial, dto, "INACTIVA", "ACTIVA");
+        tenantAuditService.logFromContext(
+            "CREDENCIALES",
+            "ACTIVAR_CREDENCIAL",
+            "Credencial activada id=" + credencial.getIdCredencial(),
+            contextProvider
+        );
         return obtenerPorNumero(dto.getNumeroCredencial());
     }
 
@@ -106,6 +126,12 @@ public class CredencialService {
                 credencial.getParametrosId()
         );
         registrarBitacora(credencial, dto, "ACTIVA", "INACTIVA");
+        tenantAuditService.logFromContext(
+            "CREDENCIALES",
+            "INACTIVAR_CREDENCIAL",
+            "Credencial inactivada id=" + credencial.getIdCredencial(),
+            contextProvider
+        );
         return obtenerPorNumero(dto.getNumeroCredencial());
     }
 
@@ -125,6 +151,13 @@ public class CredencialService {
                 credencial.getIdCredencial()
         );
         registrarBitacora(credencial, dto, credencial.getEstado(), "CANCELADA");
+
+        tenantAuditService.logFromContext(
+            "CREDENCIALES",
+            "CANCELAR_CREDENCIAL",
+            "Credencial cancelada id=" + credencial.getIdCredencial(),
+            contextProvider
+        );
 
         credencial.setEstado("CANCELADA");
         credencial.setMotivoCancelacion(dto.getObservacion());

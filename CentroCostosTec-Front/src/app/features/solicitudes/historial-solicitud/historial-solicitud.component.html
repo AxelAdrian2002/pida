@@ -1,0 +1,110 @@
+<div class="historial-container">
+  <h5 class="mb-3">Historial de Cambios</h5>
+
+  <div *ngIf="cargando" class="spinner-border text-primary" role="status">
+    <span class="visually-hidden">Cargando...</span>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger alert-dismissible fade show" role="alert">
+    {{ error }}
+  </div>
+
+  <div *ngIf="!cargando && historial.length === 0 && !error" class="alert alert-info">
+    No hay cambios registrados para esta solicitud
+  </div>
+
+  <div *ngIf="!cargando && historial.length > 0" class="timeline">
+    <div *ngFor="let item of historial; let last = last" class="timeline-item">
+      <div class="timeline-marker" [ngClass]="'bg-' + obtenerColorAccion(item.accion)">
+        {{ obtenerIconoAccion(item.accion) }}
+      </div>
+      
+      <div class="timeline-content">
+        <div class="timeline-header">
+          <strong>{{ item.accion }}</strong>
+          <span class="badge" [ngClass]="'bg-' + obtenerColorAccion(item.accion)">
+            {{ item.tipo_solicitud }}
+          </span>
+        </div>
+
+        <div class="timeline-details">
+          <p class="mb-1">
+            <small class="text-muted">
+              {{ formatearFecha(item.fecha_cambio) }}
+            </small>
+          </p>
+          
+          <p *ngIf="item.usuario_nombre" class="mb-1">
+            <strong>Usuario:</strong> {{ item.usuario_nombre }}
+          </p>
+
+          <p *ngIf="item.estado_anterior" class="mb-1">
+            <strong>Estado anterior:</strong> <span class="badge bg-secondary">{{ item.estado_anterior }}</span>
+            <strong class="ms-2">➜</strong>
+            <strong class="ms-2">Estado nuevo:</strong> <span class="badge bg-success">{{ item.estado_nuevo }}</span>
+          </p>
+
+          <p *ngIf="item.motivo_cambio" class="mb-0">
+            <strong>Motivo:</strong> {{ item.motivo_cambio }}
+          </p>
+        </div>
+      </div>
+
+      <div *ngIf="!last" class="timeline-line"></div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .timeline {
+    position: relative;
+    padding-left: 30px;
+  }
+
+  .timeline-item {
+    margin-bottom: 20px;
+    position: relative;
+  }
+
+  .timeline-marker {
+    position: absolute;
+    left: -20px;
+    top: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+  }
+
+  .timeline-line {
+    position: absolute;
+    left: -2px;
+    top: 40px;
+    width: 2px;
+    height: 20px;
+    background-color: #ddd;
+  }
+
+  .timeline-content {
+    background-color: #f8f9fa;
+    padding: 12px;
+    border-radius: 4px;
+    border-left: 3px solid #007bff;
+  }
+
+  .timeline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .timeline-details p {
+    margin-bottom: 0.5rem;
+  }
+</style>

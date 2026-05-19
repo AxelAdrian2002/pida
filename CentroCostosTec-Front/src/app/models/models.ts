@@ -17,8 +17,6 @@ export interface PageResponse<T> {
 export interface LoginRequest {
   /** Equivalente a ModelLogin.corporativo del  */
   corporativo: string;
-  /** Equivalente a ModelLogin.centrocostos del  */
-  centrocostos: string;
   username: string;
   password: string;
   /** Contador de intentos fallidos (para bloqueo tras 3 intentos, igual que ) */
@@ -44,6 +42,39 @@ export interface LoginResponse {
   corporativoId?: string;
   /** Mismo que centroID en centrocostos */
   centroId?: string;
+  requiereCambioPassword?: boolean;
+}
+
+export interface EmpresaConfiguracion {
+  empresa: {
+    codigoEmpresa?: string;
+    nombreEmpresa?: string;
+    colorPrimario?: string;
+    colorSecundario?: string;
+    logoUrl?: string;
+    razonSocial?: string;
+    rfc?: string;
+    emailContacto?: string;
+    telefonoContacto?: string;
+    sitioWeb?: string;
+    direccion?: {
+      calle?: string;
+      numeroExterior?: string;
+      numeroInterior?: string;
+      colonia?: string;
+      municipio?: string;
+      estado?: string;
+      pais?: string;
+      codigoPostal?: string;
+    };
+  };
+  perfil: {
+    nombre?: string;
+    email?: string;
+    curp?: string;
+    rfc?: string;
+    fotoUrl?: string;
+  };
 }
 
 export interface Solicitud {

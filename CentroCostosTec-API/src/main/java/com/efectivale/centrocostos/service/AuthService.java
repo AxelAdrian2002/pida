@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -19,8 +20,8 @@ import java.util.Map;
  *
  * Flujo:
  *  1. Valida corporativo en tabla 'corporativos' (dbdespensa)
- *  2. Valida centro de costos en tabla 'centrocostos' (dbdespensa) â†’ obtiene clienteid / consignatarioid
- *  3. Valida usuario en tabla 'corpusuarios' (dbdespensa) con contraseÃ±a MD5
+ *  2. Resuelve clienteid / consignatarioid activos para ese corporativo
+ *  3. Valida usuario en tabla 'corpusuarios' (dbdespensa) con contrasena MD5
  *  4. Genera JWT con claims del usuario
  */
 @Service
@@ -31,52 +32,64 @@ public class AuthService {
     /** JdbcTemplate apuntando a la BD primaria dbdespensa (PostgreSQL). */
     private final JdbcTemplate primaryJdbc;
     private final JwtUtil jwtUtil;
+    private final TenantPermissionService tenantPermissionService;
 
     public AuthService(@Qualifier("dbdespensaJdbc") JdbcTemplate primaryJdbc,
-                       JwtUtil jwtUtil) {
+                       JwtUtil jwtUtil,
+                       TenantPermissionService tenantPermissionService) {
         this.primaryJdbc = primaryJdbc;
         this.jwtUtil = jwtUtil;
+        this.tenantPermissionService = tenantPermissionService;
     }
 
     // -----------------------------------------------------------------------
     public Map<String, Object> login(LoginDto dto) {
-        log.info("Iniciando autenticacion para usuario '{}' corp='{}' centro='{}'",
-                dto.getUsername(), dto.getCorporativo(), dto.getCentrocostos());
+        log.info("Iniciando autenticacion para usuario '{}' corp='{}'",
+            dto.getUsername(), dto.getCorporativo());
 
         // 1. Validar corporativo
         validarCorporativo(dto.getCorporativo());
 
-        // 2. Validar centro de costos y obtener clienteid / consignatarioid
-        long[] clienteConsignatario = validarCentroCostos(dto.getCorporativo(), dto.getCentrocostos());
+        // 2. Resolver contexto operativo principal del corporativo
+        long[] clienteConsignatario = obtenerContextoOperativo(dto.getCorporativo());
         long clienteId       = clienteConsignatario[0];
         long consignatarioId = clienteConsignatario[1];
 
-        // 3. Validar usuario y contraseÃ±a (MD5)
-        int intentos = dto.getIntentos() != null ? dto.getIntentos() : 0;
-        Map<String, Object> usuarioData = validarUsuario(dto.getCorporativo(), dto.getCentrocostos(),
+        // 3. Validar usuario y contrasena (MD5)
+        Integer intentosDto = dto.getIntentos();
+        int intentos = intentosDto != null ? intentosDto : 0;
+        Map<String, Object> usuarioData = validarUsuario(dto.getCorporativo(),
                 dto.getUsername(), dto.getPassword(), intentos);
 
         int perfilId  = ((Number) usuarioData.get("perfilid")).intValue();
         int usuarioId = ((Number) usuarioData.get("usuarioid")).intValue();
         String nombre = (String) usuarioData.getOrDefault("usuarionombre", "");
+        String centroId = (String) usuarioData.getOrDefault("centroid", "");
+        boolean requiereCambioPassword = parseBoolean(usuarioData.get("requiere_cambio_password"));
         String rol    = mapearRol(perfilId);
+        List<String> permisos = tenantPermissionService.resolvePermissions(dto.getCorporativo(), usuarioId, perfilId)
+            .stream()
+            .sorted()
+            .toList();
 
         // 4. Generar JWT con claims extendidos
         String token = jwtUtil.generateToken(dto.getUsername(), rol, usuarioId, clienteId, consignatarioId,
-                dto.getCorporativo(), dto.getCentrocostos());
+            dto.getCorporativo(), centroId, permisos);
 
         log.info("Autenticacion exitosa para usuario '{}' rol='{}' clienteId={}", dto.getUsername(), rol, clienteId);
 
-        return Map.of(
-            "token",           token,
-            "username",        dto.getUsername(),
-            "nombreCompleto",  nombre != null ? nombre : "",
-            "rol",             rol,
-            "idUsuario",       usuarioId,
-            "clienteId",       clienteId,
-            "consignatarioId", consignatarioId,
-            "corporativoId",   dto.getCorporativo(),
-            "centroId",        dto.getCentrocostos()
+        return Map.ofEntries(
+            Map.entry("token", token),
+            Map.entry("username", dto.getUsername()),
+            Map.entry("nombreCompleto", nombre != null ? nombre : ""),
+            Map.entry("rol", rol),
+            Map.entry("idUsuario", usuarioId),
+            Map.entry("clienteId", clienteId),
+            Map.entry("consignatarioId", consignatarioId),
+            Map.entry("corporativoId", dto.getCorporativo()),
+            Map.entry("centroId", centroId),
+            Map.entry("permisos", permisos),
+            Map.entry("requiereCambioPassword", requiereCambioPassword)
         );
     }
 
@@ -99,31 +112,31 @@ public class AuthService {
         }
     }
 
-    private long[] validarCentroCostos(String corporativoId, String centroId) {
+    private long[] obtenerContextoOperativo(String corporativoId) {
         try {
             SqlRowSet rs = primaryJdbc.queryForRowSet(
                 "SELECT clienteid, consignatarioid FROM centrocostos " +
-                "WHERE centroid = ? AND corporativoid = ? AND centroactivo = true",
-                centroId, corporativoId);
+                "WHERE corporativoid = ? AND centroactivo = true " +
+                "ORDER BY centroid LIMIT 1",
+                corporativoId);
             if (!rs.next()) {
-                throw new IllegalArgumentException("No existe el Centro de Costos o no estÃ¡ activo");
+                throw new IllegalArgumentException("No existe una unidad operativa activa para la empresa");
             }
             return new long[]{ rs.getLong("clienteid"), rs.getLong("consignatarioid") };
         } catch (Exception e) {
             if (e instanceof IllegalArgumentException) throw e;
-            log.error("Error validando centro de costos: {}", e.getMessage());
-            throw new IllegalArgumentException("Error al validar centro de costos: " + e.getMessage());
+            log.error("Error validando contexto operativo: {}", e.getMessage());
+            throw new IllegalArgumentException("Error al validar el contexto operativo: " + e.getMessage());
         }
     }
 
-    private Map<String, Object> validarUsuario(String corporativoId, String centroId,
+    private Map<String, Object> validarUsuario(String corporativoId,
                                                String username, String password, int intentos) {
         try {
             SqlRowSet rs = primaryJdbc.queryForRowSet(
                 "SELECT u.usuarioid, u.usuarionombre, u.usuariopwd, u.usuarioactivo, u.perfilid, " +
-                "       d.clienteid, d.consignatarioid " +
+                "       u.centroid, u.requiere_cambio_password, u.email_verificado " +
                 "FROM corpusuarios u " +
-                "JOIN centrocostos d USING(corporativoID, centroID) " +
                 "WHERE u.corporativoID = ? AND u.usuarioUSR = ?",
                 corporativoId, username);
 
@@ -133,6 +146,7 @@ public class AuthService {
 
             int usuarioId = rs.getInt("usuarioid");
             boolean activo = rs.getBoolean("usuarioactivo");
+            boolean emailVerificado = rs.getBoolean("email_verificado");
 
             String pwdBd  = normalizarHash(rs.getString("usuariopwd"));
             String pwdMd5 = normalizarHash(toMd5(password));
@@ -145,6 +159,10 @@ public class AuthService {
                 throw new IllegalArgumentException("Contrasena incorrecta");
             }
 
+            if (!emailVerificado) {
+                throw new IllegalArgumentException("La cuenta aun no esta verificada. Revisa tu correo.");
+            }
+
             if (!activo) {
                 reactivarUsuario(corporativoId, usuarioId);
             }
@@ -152,7 +170,9 @@ public class AuthService {
             return Map.of(
                 "usuarioid",   usuarioId,
                 "usuarionombre", rs.getString("usuarionombre") != null ? rs.getString("usuarionombre") : "",
-                "perfilid",    rs.getInt("perfilid")
+                "perfilid",    rs.getInt("perfilid"),
+                "centroid",    rs.getString("centroid") != null ? rs.getString("centroid") : "",
+                "requiere_cambio_password", rs.getBoolean("requiere_cambio_password")
             );
         } catch (Exception e) {
             if (e instanceof IllegalArgumentException) throw e;
@@ -194,6 +214,16 @@ public class AuthService {
             return true;
         }
         return hashCalculado.replace("0", "").equals(hashBd.replace("0", ""));
+    }
+
+    private boolean parseBoolean(Object value) {
+        if (value instanceof Boolean b) {
+            return b;
+        }
+        if (value == null) {
+            return false;
+        }
+        return "true".equalsIgnoreCase(String.valueOf(value).trim());
     }
 
     // -----------------------------------------------------------------------

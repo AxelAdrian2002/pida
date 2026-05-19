@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportes de Solicitudes - Centro de Costos NOVAHUB</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-light p-4">
+    <div class="container-lg">
+        <div class="mb-4">
+            <h4 class="text-teal"><i class="fas fa-chart-bar me-2"></i>Reportes de Solicitudes</h4>
+            <small class="text-muted">Análisis y estadísticas del sistema</small>
+        </div>
+
+        <!-- KPIs -->
+        <div class="row mb-4 g-3">
+            <div class="col-md-3">
+                <div class="card shadow-sm text-center">
+                    <div class="card-body">
+                        <h3 class="text-primary">347</h3>
+                        <small class="text-muted">Total Solicitudes</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm text-center">
+                    <div class="card-body">
+                        <h3 class="text-success">245</h3>
+                        <small class="text-muted">Autorizadas</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm text-center">
+                    <div class="card-body">
+                        <h3 class="text-warning">52</h3>
+                        <small class="text-muted">Pendientes</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm text-center">
+                    <div class="card-body">
+                        <h3 class="text-danger">50</h3>
+                        <small class="text-muted">Rechazadas</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pestañas -->
+        <ul class="nav nav-tabs mb-4" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" href="#resumen" data-bs-toggle="tab">
+                    <i class="fas fa-chart-pie me-1"></i> Resumen
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#auditoria" data-bs-toggle="tab">
+                    <i class="fas fa-list me-1"></i> Auditoría
+                </a>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <!-- Tab: Resumen -->
+            <div class="tab-pane fade show active" id="resumen">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-chart-bar me-1"></i>Por Tipo de Solicitud
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center g-3">
+                            <div class="col-md-3">
+                                <div style="width: 100px; height: 100px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">120</div>
+                                <small class="d-block mt-2">DISPERSION</small>
+                            </div>
+                            <div class="col-md-3">
+                                <div style="width: 100px; height: 100px; background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%); border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">85</div>
+                                <small class="d-block mt-2">STOCK</small>
+                            </div>
+                            <div class="col-md-3">
+                                <div style="width: 100px; height: 100px; background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">95</div>
+                                <small class="d-block mt-2">TARJETA</small>
+                            </div>
+                            <div class="col-md-3">
+                                <div style="width: 100px; height: 100px; background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%); border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">47</div>
+                                <small class="d-block mt-2">ADICIONAL</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <i class="fas fa-filter me-1"></i>Filtros
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label">Tipo</label>
+                                <select class="form-select">
+                                    <option>Todos</option>
+                                    <option>DISPERSION</option>
+                                    <option>STOCK</option>
+                                    <option>TARJETA</option>
+                                    <option>ADICIONAL</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Fecha Inicio</label>
+                                <input type="date" class="form-control">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Fecha Fin</label>
+                                <input type="date" class="form-control">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">&nbsp;</label>
+                                <button class="btn btn-primary w-100">
+                                    <i class="fas fa-search me-1"></i> Filtrar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Auditoría -->
+            <div class="tab-pane fade" id="auditoria">
+                <div class="card shadow-sm mb-3">
+                    <div class="card-body">
+                        <div class="row g-2">
+                            <div class="col-md-2">
+                                <label class="form-label">Acción</label>
+                                <select class="form-select">
+                                    <option>Todas</option>
+                                    <option>CREAR</option>
+                                    <option>AUTORIZAR</option>
+                                    <option>RECHAZAR</option>
+                                    <option>CANCELAR</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Tipo Solicitud</label>
+                                <select class="form-select">
+                                    <option>Todos</option>
+                                    <option>DISPERSION</option>
+                                    <option>STOCK</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Fecha Inicio</label>
+                                <input type="date" class="form-control">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Fecha Fin</label>
+                                <input type="date" class="form-control">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">&nbsp;</label>
+                                <button class="btn btn-primary w-100">Filtrar</button>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">&nbsp;</label>
+                                <button class="btn btn-outline-success w-100">Excel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0 table-sm">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Solicitud ID</th>
+                                    <th>Acción</th>
+                                    <th>Tipo</th>
+                                    <th>Usuario</th>
+                                    <th>Fecha</th>
+                                    <th>Motivo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>SOL-12345</code></td>
+                                    <td><span class="badge bg-success"><i class="fas fa-check me-1"></i>AUTORIZAR</span></td>
+                                    <td>DISPERSION</td>
+                                    <td>admin@empresa.com</td>
+                                    <td>2024-01-20 14:30</td>
+                                    <td>Cumple requisitos</td>
+                                </tr>
+                                <tr>
+                                    <td><code>SOL-12346</code></td>
+                                    <td><span class="badge bg-danger"><i class="fas fa-times me-1"></i>RECHAZAR</span></td>
+                                    <td>STOCK</td>
+                                    <td>supervisora@empresa.com</td>
+                                    <td>2024-01-20 13:45</td>
+                                    <td>Datos incompletos</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

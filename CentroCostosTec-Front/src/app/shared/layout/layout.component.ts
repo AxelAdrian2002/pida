@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { EmpresaAdminService } from '../../services/empresa-admin.service';
 
 @Component({
   selector: 'app-layout',
@@ -24,7 +25,10 @@ import { AuthService } from '../../services/auth.service';
     >
       <div class="p-3 border-bottom border-secondary">
         <div class="d-flex align-items-center justify-content-between gap-2">
-          <span class="fw-bold fs-6 text-nowrap sidebar-label">Plataforma Interna</span>
+          <div class="d-flex align-items-center gap-2 overflow-hidden">
+            <img *ngIf="logoUrl" [src]="logoUrl" alt="Logo empresa" class="brand-logo sidebar-label">
+            <span class="fw-bold fs-6 text-nowrap sidebar-label">{{ nombreEmpresa }}</span>
+          </div>
           <button
             class="btn btn-sm btn-outline-light sidebar-toggle"
             type="button"
@@ -111,6 +115,14 @@ import { AuthService } from '../../services/auth.service';
             <i class="fas fa-user-edit me-2"></i><span>Actualizar Datos</span>
           </a>
         </li>
+        <li class="nav-item mt-2" *ngIf="canAny('ADMIN')">
+          <small class="section-label text-uppercase px-3">Empresa</small>
+        </li>
+        <li class="nav-item" *ngIf="canAny('ADMIN')">
+          <a class="nav-link" routerLink="/empresa/configuracion" routerLinkActive="active">
+            <i class="fas fa-building me-2"></i><span>Configuracion Empresa</span>
+          </a>
+        </li>
         <li class="nav-item mt-2" *ngIf="canAny('ADMIN','CAPTURA','AUTORIZADOR','CONSULTA')">
           <small class="section-label text-uppercase px-3">Perfil</small>
         </li>
@@ -138,6 +150,7 @@ import { AuthService } from '../../services/auth.service';
       <header class="bg-primary text-white shadow-sm px-4 py-3 d-flex justify-content-between align-items-center">
         <div>
           <div class="fw-semibold">{{ centroNombre }}</div>
+          <small class="d-block opacity-75">Empresa: {{ corporativoActual }}</small>
           <small class="opacity-75">{{ fechaActual }}</small>
         </div>
         <div class="d-flex align-items-center gap-2">
@@ -165,6 +178,17 @@ import { AuthService } from '../../services/auth.service';
       transition: width .22s ease, min-width .22s ease;
       position: relative;
       z-index: 5;
+      background: var(--brand-secondary) !important;
+    }
+
+    .brand-logo {
+      width: 34px;
+      height: 34px;
+      object-fit: contain;
+      border-radius: 0;
+      background: transparent;
+      padding: 0;
+      flex: 0 0 auto;
     }
 
     .sidebar.is-collapsed {
@@ -271,7 +295,7 @@ import { AuthService } from '../../services/auth.service';
 
     .sidebar .nav-link.active {
       color: #ffffff;
-      background: rgba(13, 110, 253, .9);
+      background: var(--brand-primary);
       box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1);
     }
 
@@ -292,7 +316,7 @@ import { AuthService } from '../../services/auth.service';
     .sidebar-logout-btn:focus {
       color: #ffffff;
       border-color: rgba(255, 255, 255, .85);
-      background: rgba(13, 110, 253, .9);
+      background: var(--brand-primary);
       box-shadow: 0 0 0 .2rem rgba(13, 110, 253, .25);
     }
 
@@ -331,17 +355,23 @@ import { AuthService } from '../../services/auth.service';
     }
   `]
 })
-export class LayoutComponent {
+export class LayoutComponent implements OnInit {
   user = this.authService.getUser() as any;
   sidebarCollapsed = false;
   sidebarHovered = false;
   solicitudesSubmenuOpen = true;
+  nombreEmpresa = 'Plataforma Interna';
+  logoUrl = '';
   fechaActual = new Date().toLocaleDateString('es-MX', {
     weekday: 'long', year: 'numeric', month: 'long', day: '2-digit'
   });
 
   get centroNombre(): string {
     return this.user?.centroNombre || this.user?.rs_centronombre || this.user?.centroId || this.user?.rs_centroid || 'Operaciones Internas';
+  }
+
+  get corporativoActual(): string {
+    return this.user?.corporativoId || this.user?.corporativoid || 'N/A';
   }
 
   canAny(...roles: string[]): boolean {
@@ -372,7 +402,32 @@ export class LayoutComponent {
     this.solicitudesSubmenuOpen = !this.solicitudesSubmenuOpen;
   }
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(
+    private authService: AuthService,
+    private empresaAdminService: EmpresaAdminService,
+    private router: Router
+  ) {}
+
+  ngOnInit(): void {
+    const branding = this.empresaAdminService.aplicarBrandingGuardado();
+    if (branding) {
+      this.nombreEmpresa = branding.nombreEmpresa;
+      this.logoUrl = branding.logoUrl;
+    }
+
+    if (!this.authService.isLoggedIn()) {
+      return;
+    }
+
+    this.empresaAdminService.obtenerConfiguracion().subscribe({
+      next: res => {
+        const configuracion = res?.datos;
+        this.nombreEmpresa = configuracion?.empresa?.nombreEmpresa || this.nombreEmpresa;
+        this.logoUrl = configuracion?.empresa?.logoUrl || '';
+        this.empresaAdminService.aplicarBranding(configuracion);
+      }
+    });
+  }
 
   logout(): void {
     this.authService.logout();

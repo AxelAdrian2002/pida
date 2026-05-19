@@ -55,11 +55,59 @@ public class SolicitudController {
         return ResponseEntity.ok(ApiResponse.exito(solicitudService.obtenerSolicitud(id)));
     }
 
+    @PutMapping("/solicitudes/{id}/autorizar")
+    @PreAuthorize("hasAnyRole('ADMIN','CAPTURA')")
+    public ResponseEntity<ApiResponse<Solicitud>> autorizar(
+            @PathVariable Long id,
+            @RequestParam(required = false) String observaciones) {
+        Long idUsuario = contextProvider.getIdUsuario();
+        if (idUsuario == null) {
+            throw new IllegalStateException("No se pudo obtener el usuario autenticado");
+        }
+        return ResponseEntity.ok(ApiResponse.exito(
+            solicitudService.autorizarSolicitud(id, idUsuario, observaciones)
+        ));
+    }
+
+    @PutMapping("/solicitudes/{id}/rechazar")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<Solicitud>> rechazar(
+            @PathVariable Long id,
+            @RequestParam(required = false) String motivo) {
+        Long idUsuario = contextProvider.getIdUsuario();
+        if (idUsuario == null) {
+            throw new IllegalStateException("No se pudo obtener el usuario autenticado");
+        }
+        if (motivo == null || motivo.isBlank()) {
+            throw new IllegalArgumentException("El motivo del rechazo es requerido");
+        }
+        return ResponseEntity.ok(ApiResponse.exito(
+            solicitudService.rechazarSolicitud(id, idUsuario, motivo)
+        ));
+    }
+
+    @PutMapping("/solicitudes/{id}/cancelar")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<Solicitud>> cancelar(
+            @PathVariable Long id,
+            @RequestParam(required = false) String motivo) {
+        Long idUsuario = contextProvider.getIdUsuario();
+        if (idUsuario == null) {
+            throw new IllegalStateException("No se pudo obtener el usuario autenticado");
+        }
+        if (motivo == null || motivo.isBlank()) {
+            throw new IllegalArgumentException("El motivo de la cancelación es requerido");
+        }
+        return ResponseEntity.ok(ApiResponse.exito(
+            solicitudService.cancelarSolicitud(id, idUsuario, motivo)
+        ));
+    }
+
         @PostMapping(value = {
             "/solicitudes/apoyo-economico",
             "/Administracion_Pedidos/crear_pedido_dispersion/v1/crear_pedido_dispersion/guardarPedido"
         }, consumes = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasAnyRole('ADMIN','CAPTURA')")
+    @PreAuthorize("hasAnyRole('ADMIN','CAPTURA','EMPLEADO')")
     public ResponseEntity<ApiResponse<Solicitud>> crearDispersion(@Valid @RequestBody SolicitudDto dto) {
         dto.setTipoSolicitud("DISPERSION");
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -73,7 +121,7 @@ public class SolicitudController {
             },
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
         )
-    @PreAuthorize("hasAnyRole('ADMIN','CAPTURA')")
+    @PreAuthorize("hasAnyRole('ADMIN','CAPTURA','EMPLEADO')")
     public ResponseEntity<ApiResponse<Solicitud>> crearDispersion(
             @RequestParam String data,
             @RequestParam Long userId) throws Exception {
@@ -88,7 +136,7 @@ public class SolicitudController {
             "/solicitudes/reposicion",
             "/Administracion_Pedidos/crear_pedido_stock/v1/crear_pedido_stock/guardarPedido"
         }, consumes = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasAnyRole('ADMIN','CAPTURA')")
+    @PreAuthorize("hasAnyRole('ADMIN','CAPTURA','EMPLEADO')")
     public ResponseEntity<ApiResponse<Solicitud>> crearStock(@Valid @RequestBody SolicitudDto dto) {
         dto.setTipoSolicitud("STOCK");
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -102,7 +150,7 @@ public class SolicitudController {
             },
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
         )
-    @PreAuthorize("hasAnyRole('ADMIN','CAPTURA')")
+    @PreAuthorize("hasAnyRole('ADMIN','CAPTURA','EMPLEADO')")
     public ResponseEntity<ApiResponse<Solicitud>> crearStock(
             @RequestParam String data,
             @RequestParam Long userId) throws Exception {
@@ -117,7 +165,7 @@ public class SolicitudController {
             "/solicitudes/nueva-asignacion",
             "/Administracion_Pedidos/crear_pedido_tarjeta/v1/crear_pedido_tarjeta/guardarPedido"
         }, consumes = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasAnyRole('ADMIN','CAPTURA')")
+    @PreAuthorize("hasAnyRole('ADMIN','CAPTURA','EMPLEADO')")
     public ResponseEntity<ApiResponse<Solicitud>> crearTarjeta(@Valid @RequestBody SolicitudDto dto) {
         dto.setTipoSolicitud("TARJETA");
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -128,7 +176,7 @@ public class SolicitudController {
             "/solicitudes/asignacion-adicional",
             "/Administracion_Pedidos/crear_pedido_adicional/v1/crear_pedido_adicional/guardarPedido"
         }, consumes = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasAnyRole('ADMIN','CAPTURA')")
+    @PreAuthorize("hasAnyRole('ADMIN','CAPTURA','EMPLEADO')")
     public ResponseEntity<ApiResponse<Solicitud>> crearAdicional(@Valid @RequestBody SolicitudDto dto) {
         dto.setTipoSolicitud("ADICIONAL");
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -142,7 +190,7 @@ public class SolicitudController {
             },
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
         )
-    @PreAuthorize("hasAnyRole('ADMIN','CAPTURA')")
+    @PreAuthorize("hasAnyRole('ADMIN','CAPTURA','EMPLEADO')")
     public ResponseEntity<ApiResponse<Solicitud>> crearTarjeta(
             @RequestParam String data,
             @RequestParam Long userId) throws Exception {
@@ -160,7 +208,7 @@ public class SolicitudController {
             },
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
         )
-    @PreAuthorize("hasAnyRole('ADMIN','CAPTURA')")
+    @PreAuthorize("hasAnyRole('ADMIN','CAPTURA','EMPLEADO')")
     public ResponseEntity<ApiResponse<Solicitud>> crearAdicional(
             @RequestParam String data,
             @RequestParam Long userId) throws Exception {
@@ -421,7 +469,7 @@ public class SolicitudController {
     }
 
         @GetMapping({"/solicitudes/aprobacion/catalogos", "/Administracion_Pedidos/autorizar_pedido/v1/autorizar_pedido/getFillSelect/"})
-    @PreAuthorize("hasAnyRole('ADMIN','AUTORIZADOR')")
+    @PreAuthorize("@perm.has('SOLICITUDES_AUTORIZAR')")
     public ResponseEntity<ApiResponse<List<Map<String, String>>>> getFillSelect() {
         String centroSesion = null;
         List<Map<String, String>> centros = new java.util.ArrayList<>();
@@ -433,7 +481,7 @@ public class SolicitudController {
     }
 
         @GetMapping({"/solicitudes/aprobacion/listado", "/Administracion_Pedidos/autorizar_pedido/v1/autorizar_pedido/getDataTable"})
-    @PreAuthorize("hasAnyRole('ADMIN','AUTORIZADOR')")
+    @PreAuthorize("@perm.has('SOLICITUDES_AUTORIZAR')")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getDataTable(
             @RequestParam(required = false) String data) {
         Map<String, Object> request = new HashMap<>();
@@ -482,7 +530,7 @@ public class SolicitudController {
     }
 
         @PutMapping({"/solicitudes/{id}/aprobar", "/pedidos/{id}/autorizar"})
-    @PreAuthorize("hasAnyRole('ADMIN','AUTORIZADOR')")
+    @PreAuthorize("hasRole('ADMIN')")
         public ResponseEntity<ApiResponse<Solicitud>> autorizar(
             @PathVariable Long id,
             @RequestParam Long idUsuarioAutoriza,
@@ -492,7 +540,7 @@ public class SolicitudController {
     }
 
         @PostMapping({"/solicitudes/aprobacion", "/Administracion_Pedidos/autorizar_pedido/v1/autorizar_pedido/proccessOrder"})
-        @PreAuthorize("hasAnyRole('ADMIN','AUTORIZADOR')")
+        @PreAuthorize("hasRole('ADMIN')")
         public ResponseEntity<ApiResponse<Solicitud>> autorizarCompat(
             @RequestParam Long idPedido,
                 @RequestParam(required = false) Long idUsuarioAutoriza,
@@ -506,6 +554,40 @@ public class SolicitudController {
             return ResponseEntity.ok(ApiResponse.exito("Solicitud aprobada exitosamente",
                 solicitudService.autorizarSolicitud(idPedido, usuarioAutoriza, observaciones)));
         }
+
+    // ------- RECHAZAR SOLICITUD -------
+    @PutMapping({"/solicitudes/{id}/rechazar", "/pedidos/{id}/rechazar"})
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<Solicitud>> rechazar(
+            @PathVariable Long id,
+            @RequestParam(required = false) Long idUsuarioRechaza,
+            @RequestParam String motivo) {
+        Long usuarioRechaza = (idUsuarioRechaza == null || idUsuarioRechaza <= 0)
+                ? contextProvider.getIdUsuario()
+                : idUsuarioRechaza;
+        if (usuarioRechaza == null || usuarioRechaza <= 0) {
+            throw new IllegalArgumentException("No se pudo resolver idUsuarioRechaza para rechazar la solicitud");
+        }
+        return ResponseEntity.ok(ApiResponse.exito("Solicitud rechazada exitosamente",
+                solicitudService.rechazarSolicitud(id, usuarioRechaza, motivo)));
+    }
+
+    // ------- CANCELAR SOLICITUD -------
+    @PutMapping({"/solicitudes/{id}/cancelar", "/pedidos/{id}/cancelar"})
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<Solicitud>> cancelar(
+            @PathVariable Long id,
+            @RequestParam(required = false) Long idUsuarioCancela,
+            @RequestParam String motivo) {
+        Long usuarioCancela = (idUsuarioCancela == null || idUsuarioCancela <= 0)
+                ? contextProvider.getIdUsuario()
+                : idUsuarioCancela;
+        if (usuarioCancela == null || usuarioCancela <= 0) {
+            throw new IllegalArgumentException("No se pudo resolver idUsuarioCancela para cancelar la solicitud");
+        }
+        return ResponseEntity.ok(ApiResponse.exito("Solicitud cancelada exitosamente",
+                solicitudService.cancelarSolicitud(id, usuarioCancela, motivo)));
+    }
 
     private int parseInt(Object value, int defaultValue) {
         if (value == null) {

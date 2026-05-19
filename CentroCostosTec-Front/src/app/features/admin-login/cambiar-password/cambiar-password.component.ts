@@ -44,7 +44,7 @@ import { CambioPasswordService } from '../../../services/cambio-password.service
                     <span *ngIf="!guardando">Guardar</span>
                     <span *ngIf="guardando">Guardando...</span>
                   </button>
-                  <button class="btn btn-outline-secondary" type="button" (click)="regresar()">Cancelar</button>
+                  <button class="btn btn-outline-secondary" type="button" (click)="regresar()" *ngIf="!forzarCambioPassword">Cancelar</button>
                 </div>
               </form>
             </div>
@@ -58,6 +58,7 @@ export class CambiarPasswordComponent {
   guardando = false;
   mensaje = '';
   esError = false;
+  forzarCambioPassword = false;
 
   form = this.fb.group({
     passwordanterior: ['', [Validators.required]],
@@ -70,7 +71,9 @@ export class CambiarPasswordComponent {
     private authService: AuthService,
     private cambioPasswordService: CambioPasswordService,
     private router: Router
-  ) {}
+  ) {
+    this.forzarCambioPassword = this.authService.requiresPasswordChange();
+  }
 
   guardar(): void {
     this.mensaje = '';
@@ -107,7 +110,9 @@ export class CambiarPasswordComponent {
         this.guardando = false;
         this.esError = false;
         this.mensaje = res?.mensaje || 'Contraseña actualizada correctamente.';
+        this.authService.markPasswordChanged();
         this.form.reset();
+        this.router.navigate(['/dashboard']);
       },
       error: (err) => {
         this.guardando = false;

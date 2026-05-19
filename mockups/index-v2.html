@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mockups - Centro de Costos NOVAHUB</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 40px 20px;
+        }
+        .container-main {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header-mockups {
+            background: white;
+            border-radius: 12px;
+            padding: 40px 30px;
+            margin-bottom: 40px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .header-mockups h1 {
+            font-weight: 800;
+            font-size: 2.2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+        }
+        .header-mockups p {
+            color: #6c757d;
+            font-size: 1.05rem;
+            margin-bottom: 0;
+        }
+        .section-title {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .section-title h3 {
+            color: #212529;
+            font-weight: 700;
+            margin: 0;
+            font-size: 1.4rem;
+        }
+        .card-mockup {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            height: 100%;
+        }
+        .card-mockup:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+        }
+        .card-icon {
+            width: 100%;
+            height: 120px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2.5rem;
+        }
+        .card-mockup-body {
+            padding: 20px;
+        }
+        .card-mockup-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #212529;
+            margin-bottom: 8px;
+        }
+        .card-mockup-desc {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+        .badge-version {
+            display: inline-block;
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .badge-original {
+            background: #e7f3ff;
+            color: #0066cc;
+        }
+        .badge-v2 {
+            background: #d4edda;
+            color: #155724;
+        }
+        .btn-mockup {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-mockup-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-mockup-primary:hover {
+            color: white;
+            text-decoration: none;
+            transform: scale(1.02);
+        }
+        .btn-mockup-secondary {
+            background: #e7f3ff;
+            color: #0066cc;
+        }
+        .btn-mockup-secondary:hover {
+            color: #0066cc;
+            text-decoration: none;
+            background: #cce5ff;
+        }
+        .btn-mockup-success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .btn-mockup-success:hover {
+            color: #155724;
+            text-decoration: none;
+            background: #c3e6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-main">
+        <!-- Header -->
+        <div class="header-mockups">
+            <h1><i class="fas fa-cube me-2"></i>Centro de Costos NOVAHUB</h1>
+            <p>Mockups de prototipos de interfaz de usuario - Versiones original y alineada con componentes Angular</p>
+        </div>
+
+        <!-- VERSIÓN V2 (ALINEADA CON ANGULAR) -->
+        <div class="section-title">
+            <h3><i class="fas fa-star me-2" style="color: #198754;"></i>Versión v2 - Alineada con Componentes Angular <span class="badge bg-success ms-2">RECOMENDADA</span></h3>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <!-- Dashboard V2 -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card-mockup">
+                    <div class="card-icon">
+                        <i class="fas fa-th-large"></i>
+                    </div>
+                    <div class="card-mockup-body">
+                        <span class="badge-version badge-v2">
+                            <i class="fas fa-leaf me-1"></i>V2
+                        </span>
+                        <h6 class="card-mockup-title">Dashboard Principal</h6>
+                        <p class="card-mockup-desc">Pantalla principal con datos de unidad operativa y accesos rápidos a módulos.</p>
+                        <a href="dashboard-v2.html" class="btn btn-mockup btn-mockup-primary">
+                            <i class="fas fa-eye me-1"></i>Ver Mockup
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Listar Solicitudes V2 -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card-mockup">
+                    <div class="card-icon">
+                        <i class="fas fa-list"></i>
+                    </div>
+                    <div class="card-mockup-body">
+                        <span class="badge-version badge-v2">
+                            <i class="fas fa-leaf me-1"></i>V2
+                        </span>
+                        <h6 class="card-mockup-title">Listar Solicitudes</h6>
+                        <p class="card-mockup-desc">Tabla con filtros de estado, búsqueda, precio base y paginación.</p>
+                        <a href="listar-solicitudes-v2.html" class="btn btn-mockup btn-mockup-primary">
+                            <i class="fas fa-eye me-1"></i>Ver Mockup
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Crear Solicitud V2 -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card-mockup">
+                    <div class="card-icon">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                    </div>
+                    <div class="card-mockup-body">
+                        <span class="badge-version badge-v2">
+                            <i class="fas fa-leaf me-1"></i>V2
+                        </span>
+                        <h6 class="card-mockup-title">Crear Solicitud</h6>
+                        <p class="card-mockup-desc">Formulario para cargar archivo Excel de dispersión económica.</p>
+                        <a href="crear-solicitud-v2.html" class="btn btn-mockup btn-mockup-primary">
+                            <i class="fas fa-eye me-1"></i>Ver Mockup
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Autorizar Solicitud V2 -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card-mockup">
+                    <div class="card-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="card-mockup-body">
+                        <span class="badge-version badge-v2">
+                            <i class="fas fa-leaf me-1"></i>V2
+                        </span>
+                        <h6 class="card-mockup-title">Autorizar Solicitud</h6>
+                        <p class="card-mockup-desc">Panel de aprobación con detalles financieros y cálculo de precio base.</p>
+                        <a href="autorizar-solicitud-v2.html" class="btn btn-mockup btn-mockup-primary">
+                            <i class="fas fa-eye me-1"></i>Ver Mockup
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VERSIÓN ORIGINAL -->
+        <div class="section-title">
+            <h3><i class="fas fa-archive me-2"></i>Versión Original - Diseño Detallado</h3>
+        </div>
+
+        <div class="row g-3">
+            <!-- Dashboard Original -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card-mockup">
+                    <div class="card-icon">
+                        <i class="fas fa-th-large"></i>
+                    </div>
+                    <div class="card-mockup-body">
+                        <span class="badge-version badge-original">
+                            <i class="fas fa-box me-1"></i>v1
+                        </span>
+                        <h6 class="card-mockup-title">Dashboard Principal</h6>
+                        <p class="card-mockup-desc">Versión original con KPIs, widgets y estadísticas detalladas.</p>
+                        <a href="dashboard.html" class="btn btn-mockup btn-mockup-secondary">
+                            <i class="fas fa-eye me-1"></i>Ver Mockup
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Listar Solicitudes Original -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card-mockup">
+                    <div class="card-icon">
+                        <i class="fas fa-list"></i>
+                    </div>
+                    <div class="card-mockup-body">
+                        <span class="badge-version badge-original">
+                            <i class="fas fa-box me-1"></i>v1
+                        </span>
+                        <h6 class="card-mockup-title">Listar Solicitudes</h6>
+                        <p class="card-mockup-desc">Tabla con estadísticas, acciones y vista detallada de registros.</p>
+                        <a href="listar-solicitudes.html" class="btn btn-mockup btn-mockup-secondary">
+                            <i class="fas fa-eye me-1"></i>Ver Mockup
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Crear Solicitud Original -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card-mockup">
+                    <div class="card-icon">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                    </div>
+                    <div class="card-mockup-body">
+                        <span class="badge-version badge-original">
+                            <i class="fas fa-box me-1"></i>v1
+                        </span>
+                        <h6 class="card-mockup-title">Crear Solicitud</h6>
+                        <p class="card-mockup-desc">Formulario detallado con tabla de empleados y cálculo de precios.</p>
+                        <a href="crear-solicitud.html" class="btn btn-mockup btn-mockup-secondary">
+                            <i class="fas fa-eye me-1"></i>Ver Mockup
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Autorizar Solicitud Original -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card-mockup">
+                    <div class="card-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="card-mockup-body">
+                        <span class="badge-version badge-original">
+                            <i class="fas fa-box me-1"></i>v1
+                        </span>
+                        <h6 class="card-mockup-title">Autorizar Solicitud</h6>
+                        <p class="card-mockup-desc">Panel detallado con gráficos, historial y análisis financiero.</p>
+                        <a href="autorizar-solicitud.html" class="btn btn-mockup btn-mockup-secondary">
+                            <i class="fas fa-eye me-1"></i>Ver Mockup
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Info -->
+        <div class="section-title mt-5">
+            <h5 class="text-center text-muted">
+                <i class="fas fa-info-circle me-2"></i>
+                Usa la versión v2 para revisar la interfaz que coincide con tus componentes Angular actuales
+            </h5>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

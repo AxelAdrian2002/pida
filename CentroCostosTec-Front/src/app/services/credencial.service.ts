@@ -40,6 +40,17 @@ export class CredencialService {
     return this.http.post<ApiResponse<Credencial>>(`${this.API}/acciones/v1/accion`, this.armarAccion(req, 'Cancelar'));
   }
 
+  asignarManualmente(numeroCredencial: string, numeroEmpleado: string): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(`/api/empresas/v1/credenciales/asignacion-manual`, {
+      numeroCredencial,
+      numeroEmpleado
+    });
+  }
+
+  obtenerEmpleadosDisponibles(): Observable<ApiResponse<any[]>> {
+    return this.http.get<ApiResponse<any[]>>(`/api/empresas/v1/empleados/activos`);
+  }
+
   exportarExcel(tipo = 'CREDENCIALES'): Observable<Blob> {
     const payload = JSON.stringify({
       clienteId: this.auth.getClienteId(),

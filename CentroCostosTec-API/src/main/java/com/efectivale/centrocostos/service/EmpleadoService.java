@@ -24,7 +24,6 @@ public class EmpleadoService {
 
     private static final Logger log = LoggerFactory.getLogger(EmpleadoService.class);
     private final EmpleadoRepository empleadoRepository;
-    private final @Qualifier("dbdespensaJdbc") JdbcTemplate dbdespensaJdbc;
     private final @Qualifier("pddespensaJdbc") JdbcTemplate pddespensaJdbc;
     private final MultiDbBusinessService multiDbBusinessService;
     private final ContextProvider contextProvider;
@@ -158,6 +157,14 @@ public class EmpleadoService {
         if (empleadoRepository.existsByNumeroEmpleado(dto.getNumeroEmpleado())) {
             throw new IllegalArgumentException("Ya existe un empleado con el numero: " + dto.getNumeroEmpleado());
         }
+
+        Long clienteId = dto.getClienteId() != null ? dto.getClienteId() : contextProvider.getClienteId();
+        Long consignatarioId = dto.getConsignatarioId() != null ? dto.getConsignatarioId() : contextProvider.getConsignatarioId();
+
+        if (clienteId == null || consignatarioId == null) {
+            throw new IllegalStateException("No se pudo resolver el contexto cliente/consignatario para el alta de empleado");
+        }
+
         Empleado empleado = new Empleado();
         empleado.setNumeroEmpleado(dto.getNumeroEmpleado());
         empleado.setNombre(dto.getNombre());
@@ -165,6 +172,8 @@ public class EmpleadoService {
         empleado.setApellidoMaterno(dto.getApellidoMaterno());
         empleado.setEmail(dto.getEmail());
         empleado.setTelefono(dto.getTelefono());
+        empleado.setClienteId(clienteId);
+        empleado.setConsignatarioId(consignatarioId);
         return empleadoRepository.save(empleado);
     }
 }

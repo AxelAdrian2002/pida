@@ -58,28 +58,28 @@ public class CredencialController {
     }
 
     @PutMapping({"/credenciales/activar", "/tarjetas/activar"})
-    @PreAuthorize("hasAnyRole('ADMIN','CAPTURA')")
+    @PreAuthorize("@perm.has('CREDENCIALES_OPERAR')")
     public ResponseEntity<ApiResponse<Credencial>> activar(@Valid @RequestBody CredencialOperacionDto dto) {
         return ResponseEntity.ok(ApiResponse.exito("Credencial activada exitosamente",
                 credencialService.activarCredencial(dto)));
     }
 
     @PutMapping({"/credenciales/inactivar", "/tarjetas/inactivar"})
-    @PreAuthorize("hasAnyRole('ADMIN','CAPTURA')")
+    @PreAuthorize("@perm.has('CREDENCIALES_OPERAR')")
     public ResponseEntity<ApiResponse<Credencial>> inactivar(@Valid @RequestBody CredencialOperacionDto dto) {
         return ResponseEntity.ok(ApiResponse.exito("Credencial inactivada exitosamente",
                 credencialService.inactivarCredencial(dto)));
     }
 
     @PutMapping({"/credenciales/cancelar", "/tarjetas/cancelar"})
-    @PreAuthorize("hasAnyRole('ADMIN','CAPTURA')")
+    @PreAuthorize("@perm.has('CREDENCIALES_OPERAR')")
     public ResponseEntity<ApiResponse<Credencial>> cancelar(@Valid @RequestBody CredencialOperacionDto dto) {
         return ResponseEntity.ok(ApiResponse.exito("Credencial cancelada exitosamente",
                 credencialService.cancelarCredencial(dto)));
     }
 
     @PostMapping({"/credenciales/acciones/v1/accion", "/Administracion_Tarjetas/acciones/v1/accion"})
-    @PreAuthorize("hasAnyRole('ADMIN','CAPTURA')")
+    @PreAuthorize("@perm.has('CREDENCIALES_OPERAR')")
     public ResponseEntity<ApiResponse<Credencial>> accion(@RequestBody Map<String, Object> body,
                                                              HttpServletRequest request) {
         String action = body.get("action") != null ? body.get("action").toString() : "";
@@ -147,6 +147,7 @@ public class CredencialController {
     }
 
     @PostMapping("/Administracion_Tarjetas/cancelacion_masiva/v1/cancelacion")
+    @PreAuthorize("@perm.has('CREDENCIALES_OPERAR')")
     public ResponseEntity<ApiResponse<Map<String, Object>>> cancelacionMasiva(
             @RequestParam(required = false) String user,
             @RequestParam(required = false) String b64) {

@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listar Solicitudes - NOVAHUB</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        .navbar {
+            background: linear-gradient(135deg, #0d6efd, #0056b3);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .filtros-box {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .table-hover tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        .badge-estado {
+            font-weight: 600;
+            font-size: 0.8rem;
+            padding: 0.4rem 0.8rem;
+        }
+        .row-acciones {
+            white-space: nowrap;
+        }
+        .btn-sm {
+            padding: 0.35rem 0.65rem;
+            font-size: 0.8rem;
+        }
+        .pagination {
+            margin: 16px 0;
+        }
+        .info-stats {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+        }
+        .stat-item {
+            flex: 1;
+            text-align: center;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+        .stat-value {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #0d6efd;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark sticky-top">
+        <div class="container-fluid">
+            <span class="navbar-brand mb-0 h5">
+                <i class="fas fa-arrow-left me-2" style="cursor: pointer;"></i>NOVAHUB - Centro de Costos
+            </span>
+            <span class="text-white-50 small">Unidad: <strong>OPER-100</strong></span>
+        </div>
+    </nav>
+
+    <div class="container-fluid p-4">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="mb-1 text-primary">
+                    <i class="fas fa-list me-2"></i>Consulta de Solicitudes
+                </h3>
+                <p class="text-muted mb-0">Gestión centralizada de todas las solicitudes internas</p>
+            </div>
+            <button class="btn btn-success">
+                <i class="fas fa-check-circle me-2"></i>Aprobación Masiva
+            </button>
+        </div>
+
+        <!-- Filtros -->
+        <div class="filtros-box">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label">Estado</label>
+                    <select class="form-select">
+                        <option value="">Todos</option>
+                        <option value="pendiente" selected>PENDIENTE</option>
+                        <option value="autorizado">AUTORIZADO</option>
+                        <option value="rechazado">RECHAZADO</option>
+                        <option value="cancelado">CANCELADO</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Tipo de Solicitud</label>
+                    <select class="form-select">
+                        <option value="">Todos</option>
+                        <option>DISPERSION</option>
+                        <option>STOCK</option>
+                        <option>TARJETA</option>
+                        <option>ADICIONAL</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Búsqueda</label>
+                    <input type="text" class="form-control" placeholder="ID, descripción...">
+                </div>
+
+                <div class="col-md-3">
+                    <button class="btn btn-primary w-100">
+                        <i class="fas fa-search me-1"></i>Buscar
+                    </button>
+                </div>
+            </div>
+
+            <div class="info-stats">
+                <div class="stat-item">
+                    <div class="text-muted small">Pendientes</div>
+                    <div class="stat-value">12</div>
+                </div>
+                <div class="stat-item">
+                    <div class="text-muted small">Autorizados</div>
+                    <div class="stat-value">28</div>
+                </div>
+                <div class="stat-item">
+                    <div class="text-muted small">Rechazados</div>
+                    <div class="stat-value">3</div>
+                </div>
+                <div class="stat-item">
+                    <div class="text-muted small">Cancelados</div>
+                    <div class="stat-value">1</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla de Solicitudes -->
+        <div class="table-container">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 60px;">
+                            <input type="checkbox" class="form-check-input">
+                        </th>
+                        <th>ID</th>
+                        <th>Tipo</th>
+                        <th>Descripción</th>
+                        <th>Monto</th>
+                        <th>Precio Base</th>
+                        <th>Estado</th>
+                        <th>Fecha</th>
+                        <th>Usuario</th>
+                        <th class="row-acciones">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><input type="checkbox" class="form-check-input"></td>
+                        <td><strong>#SOL-001</strong></td>
+                        <td><span class="badge bg-info">DISPERSION</span></td>
+                        <td>Apoyo económico mayo</td>
+                        <td>$3,000.00</td>
+                        <td><span class="badge bg-light text-dark">$3,000.00</span></td>
+                        <td><span class="badge badge-estado bg-warning">Pendiente</span></td>
+                        <td>15/05/2026</td>
+                        <td>Andrea Lopez</td>
+                        <td class="row-acciones">
+                            <a href="#" class="btn btn-primary btn-sm me-1" title="Ver">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="#" class="btn btn-success btn-sm me-1" title="Autorizar">
+                                <i class="fas fa-check"></i>
+                            </a>
+                            <a href="#" class="btn btn-danger btn-sm" title="Rechazar">
+                                <i class="fas fa-times"></i>
+                            </a>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td><input type="checkbox" class="form-check-input"></td>
+                        <td><strong>#SOL-002</strong></td>
+                        <td><span class="badge bg-secondary">STOCK</span></td>
+                        <td>Reposición tarjeta dañada</td>
+                        <td>$240.00</td>
+                        <td><span class="badge bg-light text-dark">$240.00</span></td>
+                        <td><span class="badge badge-estado bg-success">Autorizado</span></td>
+                        <td>14/05/2026</td>
+                        <td>Luis Martinez</td>
+                        <td class="row-acciones">
+                            <a href="#" class="btn btn-primary btn-sm me-1" title="Ver">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="#" class="btn btn-secondary btn-sm" disabled title="Ya autorizado">
+                                <i class="fas fa-archive"></i>
+                            </a>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td><input type="checkbox" class="form-check-input"></td>
+                        <td><strong>#SOL-003</strong></td>
+                        <td><span class="badge bg-primary">TARJETA</span></td>
+                        <td>Nueva asignación OPER-100</td>
+                        <td>$80.00</td>
+                        <td><span class="badge bg-light text-dark">$80.00</span></td>
+                        <td><span class="badge badge-estado bg-success">Autorizado</span></td>
+                        <td>13/05/2026</td>
+                        <td>Carla Hernandez</td>
+                        <td class="row-acciones">
+                            <a href="#" class="btn btn-primary btn-sm me-1" title="Ver">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="#" class="btn btn-secondary btn-sm" disabled>
+                                <i class="fas fa-archive"></i>
+                            </a>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td><input type="checkbox" class="form-check-input"></td>
+                        <td><strong>#SOL-004</strong></td>
+                        <td><span class="badge bg-danger">ADICIONAL</span></td>
+                        <td>Asignación adicional por rol</td>
+                        <td>$150.00</td>
+                        <td><span class="badge bg-light text-dark">$150.00</span></td>
+                        <td><span class="badge badge-estado bg-danger">Rechazado</span></td>
+                        <td>12/05/2026</td>
+                        <td>Admin OPER-100</td>
+                        <td class="row-acciones">
+                            <a href="#" class="btn btn-primary btn-sm me-1" title="Ver">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="#" class="btn btn-secondary btn-sm" disabled>
+                                <i class="fas fa-archive"></i>
+                            </a>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td><input type="checkbox" class="form-check-input"></td>
+                        <td><strong>#SOL-005</strong></td>
+                        <td><span class="badge bg-info">DISPERSION</span></td>
+                        <td>Pago de nómina mensual</td>
+                        <td>$12,000.00</td>
+                        <td><span class="badge bg-light text-dark">$6,000.00</span></td>
+                        <td><span class="badge badge-estado bg-warning">Pendiente</span></td>
+                        <td>15/05/2026</td>
+                        <td>Andrea Lopez</td>
+                        <td class="row-acciones">
+                            <a href="#" class="btn btn-primary btn-sm me-1" title="Ver">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="#" class="btn btn-success btn-sm me-1" title="Autorizar">
+                                <i class="fas fa-check"></i>
+                            </a>
+                            <a href="#" class="btn btn-danger btn-sm" title="Rechazar">
+                                <i class="fas fa-times"></i>
+                            </a>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td><input type="checkbox" class="form-check-input"></td>
+                        <td><strong>#SOL-006</strong></td>
+                        <td><span class="badge bg-secondary">STOCK</span></td>
+                        <td>Reposición de stock tarjetas</td>
+                        <td>$480.00</td>
+                        <td><span class="badge bg-light text-dark">$480.00</span></td>
+                        <td><span class="badge badge-estado bg-warning">Pendiente</span></td>
+                        <td>15/05/2026</td>
+                        <td>Luis Martinez</td>
+                        <td class="row-acciones">
+                            <a href="#" class="btn btn-primary btn-sm me-1" title="Ver">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="#" class="btn btn-success btn-sm me-1" title="Autorizar">
+                                <i class="fas fa-check"></i>
+                            </a>
+                            <a href="#" class="btn btn-danger btn-sm" title="Rechazar">
+                                <i class="fas fa-times"></i>
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Paginación -->
+            <nav class="d-flex justify-content-between align-items-center px-4 pb-3">
+                <small class="text-muted">Mostrando 6 de 44 solicitudes</small>
+                <ul class="pagination mb-0">
+                    <li class="page-item disabled"><a class="page-link" href="#">Anterior</a></li>
+                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                    <li class="page-item"><a class="page-link" href="#">Siguiente</a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

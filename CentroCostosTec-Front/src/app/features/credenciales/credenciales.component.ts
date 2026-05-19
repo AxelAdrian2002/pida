@@ -72,6 +72,7 @@ import { Credencial } from '../../models/models';
               <th>Vigencia</th>
               <th>Saldo</th>
               <th>Estatus</th>
+              <th><i class="fas fa-user-plus" title="Asignar"></i></th>
               <th></th>
               <th></th>
               <th></th>
@@ -87,6 +88,13 @@ import { Credencial } from '../../models/models';
               <td>{{ formatVigencia(t) }}</td>
               <td>{{ formatSaldo(t) }}</td>
               <td><span class="badge" [ngClass]="getBadge(t.estado)">{{ getEstadoLabel(t) }}</span></td>
+              <td>
+                <button class="btn btn-sm btn-outline-info" (click)="abrirModalAsignacion(t)"
+                        [disabled]="!esAdmin || !puedeAsignarse(t)" 
+                        [title]="!esAdmin ? 'Solo administradores pueden asignar' : 'Asignar a empleado'">
+                  <i class="fas fa-user-plus"></i>
+                </button>
+              </td>
               <td>
                 <button class="btn btn-sm" [ngClass]="isTarjetaActiva(t) ? 'btn-outline-secondary' : 'btn-outline-primary'" (click)="toggleActivacion(t)"
                         [disabled]="t.estado === 'CANCELADA'"
@@ -124,6 +132,51 @@ import { Credencial } from '../../models/models';
 
     <div class="alert alert-success mt-3" *ngIf="exitoMsg">{{ exitoMsg }}</div>
     <div class="alert alert-danger mt-3" *ngIf="errorMsg">{{ errorMsg }}</div>
+    
+    <!-- Modal de Asignación Manual -->
+    <div class="modal fade" [class.show]="modalAsignacionAbierto" [style.display]="modalAsignacionAbierto ? 'block' : 'none'" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Asignar Credencial a Empleado</h5>
+            <button type="button" class="btn-close" (click)="cerrarModalAsignacion()" [disabled]="asignandoManual"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Credencial</label>
+              <input type="text" class="form-control" [(ngModel)]="numeroCredencialSeleccionado" readonly>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">N° Empleado a Asignar</label>
+              <div *ngIf="cargandoEmpleados" class="text-muted small py-2">
+                <span class="spinner-border spinner-border-sm me-2"></span>Cargando empleados...
+              </div>
+              <select *ngIf="!cargandoEmpleados" class="form-select" [(ngModel)]="numeroEmpleadoAsignar" [disabled]="asignandoManual">
+                <option value="">Seleccione un empleado</option>
+                <option *ngFor="let empleado of empleadosSinCredencial" [value]="empleado.numero_empleado">
+                  {{ empleado.numero_empleado }} - {{ empleado.nombre_empleado }} ({{ empleado.tarjetas_asignadas || 0 }} tarjetas)
+                </option>
+              </select>
+              <small class="text-muted" *ngIf="!cargandoEmpleados && empleadosSinCredencial.length === 0">
+                No hay empleados activos disponibles.
+              </small>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="cerrarModalAsignacion()" [disabled]="asignandoManual">Cancelar</button>
+            <button type="button" class="btn btn-primary" (click)="asignarManualmente()" [disabled]="asignandoManual">
+              <span *ngIf="asignandoManual">
+                <span class="spinner-border spinner-border-sm me-2"></span>Asignando...
+              </span>
+              <span *ngIf="!asignandoManual">Asignar</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Backdrop para modal -->
+    <div class="modal-backdrop fade" [class.show]="modalAsignacionAbierto" [style.display]="modalAsignacionAbierto ? 'block' : 'none'"></div>
   </div>
   `,
   styles: [`
@@ -157,9 +210,24 @@ export class CredencialesComponent implements OnInit {
   exitoMsg = '';
   errorMsg = '';
 
+  // Variables para asignación manual
+  modalAsignacionAbierto = false;
+  numeroCredencialSeleccionado = '';
+  numeroEmpleadoAsignar = '';
+  asignandoManual = false;
+  esAdmin = false;
+  empleadosSinCredencial: any[] = [];
+  cargandoEmpleados = false;
+
   constructor(private credencialService: CredencialService, private authService: AuthService) {}
 
-  ngOnInit(): void { this.cargar(); }
+  ngOnInit(): void { 
+    // Verificar si el usuario es administrador
+    const rol = this.authService.getRol();
+    this.esAdmin = rol === 'ADMIN';
+    
+    this.cargar(); 
+  }
 
   cargar(): void {
     this.credencialService.consultar(this.filtroEstado || undefined, undefined, this.filtroNumEmp || undefined, this.page).subscribe({
@@ -260,6 +328,84 @@ export class CredencialesComponent implements OnInit {
       },
       error: (err: HttpErrorResponse) => {
         this.errorMsg = (err.error as any)?.mensaje || 'Error al descargar excel ';
+      }
+    });
+  }
+
+  abrirModalAsignacion(t: Credencial): void {
+    if (!this.esAdmin) {
+      this.errorMsg = 'Solo administradores pueden asignar credenciales';
+      return;
+    }
+    
+    this.numeroCredencialSeleccionado = t.numeroCredencial;
+    this.numeroEmpleadoAsignar = '';
+    this.modalAsignacionAbierto = true;
+    this.cargarEmpleadosDisponibles();
+  }
+
+  cargarEmpleadosDisponibles(): void {
+    this.cargandoEmpleados = true;
+    this.credencialService.obtenerEmpleadosDisponibles().subscribe({
+      next: res => {
+        this.empleadosSinCredencial = Array.isArray(res.datos) ? res.datos : [];
+        this.cargandoEmpleados = false;
+      },
+      error: (err: HttpErrorResponse) => {
+        this.empleadosSinCredencial = [];
+        this.cargandoEmpleados = false;
+        this.errorMsg = (err.error as any)?.mensaje || 'Error al cargar empleados disponibles';
+      }
+    });
+  }
+
+  puedeAsignarse(t: Credencial): boolean {
+    // Puede asignarse si está sin asignar
+    const sinAsignar = !t.numeroEmpleado || 
+                       t.numeroEmpleado === '-' || 
+                       t.numeroEmpleado?.toUpperCase() === 'SIN_ASIGNAR' ||
+                       t.numeroEmpleado?.trim() === '';
+    return sinAsignar;
+  }
+
+  cerrarModalAsignacion(): void {
+    this.modalAsignacionAbierto = false;
+    this.numeroCredencialSeleccionado = '';
+    this.numeroEmpleadoAsignar = '';
+  }
+
+  asignarManualmente(): void {
+    if (!this.esAdmin) {
+      this.errorMsg = 'Solo administradores pueden asignar credenciales';
+      return;
+    }
+    
+    if (!this.numeroCredencialSeleccionado || !this.numeroEmpleadoAsignar) {
+      this.errorMsg = 'Debe seleccionar una credencial y un número de empleado';
+      return;
+    }
+
+    const empleadoSeleccionado = this.empleadosSinCredencial.find(
+      empleado => String(empleado.numero_empleado) === String(this.numeroEmpleadoAsignar)
+    );
+    if (!empleadoSeleccionado) {
+      this.errorMsg = 'Seleccione un empleado válido de la lista';
+      return;
+    }
+
+    this.asignandoManual = true;
+    this.credencialService.asignarManualmente(this.numeroCredencialSeleccionado, this.numeroEmpleadoAsignar).subscribe({
+      next: (res) => {
+        this.exitoMsg = `Credencial ${this.numeroCredencialSeleccionado} asignada a empleado ${this.numeroEmpleadoAsignar}`;
+        this.errorMsg = '';
+        this.asignandoManual = false;
+        this.cerrarModalAsignacion();
+        this.cargar();
+      },
+      error: (err: HttpErrorResponse) => {
+        this.exitoMsg = '';
+        this.errorMsg = (err.error as any)?.mensaje || 'Error al asignar credencial';
+        this.asignandoManual = false;
       }
     });
   }

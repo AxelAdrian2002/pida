@@ -49,14 +49,14 @@ public class GrupoController {
     }
 
     @PostMapping({"", "/"})
-    @PreAuthorize("hasAnyRole('ADMIN','CAPTURA')")
+    @PreAuthorize("@perm.has('GRUPOS_GESTIONAR')")
     public ResponseEntity<ApiResponse<Grupo>> registrar(@Valid @RequestBody GrupoDto dto) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.creado(grupoService.registrarGrupo(dto)));
     }
 
     @RequestMapping(value = "/Registrar_grupos/v1/reg_grupo/modificar/", method = {RequestMethod.POST, RequestMethod.PUT})
-    @PreAuthorize("hasAnyRole('ADMIN','CAPTURA')")
+    @PreAuthorize("@perm.has('GRUPOS_GESTIONAR')")
     public ResponseEntity<ApiResponse<Grupo>> registrar(@RequestBody Map<String, Object> body) {
         GrupoDto dto = new GrupoDto();
         dto.setGrupoid(value(body, "grupoid", value(body, "nombre", null)));
@@ -94,7 +94,7 @@ public class GrupoController {
     }
 
     @PostMapping("/{idGrupo}/empleados")
-    @PreAuthorize("hasAnyRole('ADMIN','CAPTURA')")
+    @PreAuthorize("@perm.has('GRUPOS_ASIGNAR')")
     public ResponseEntity<ApiResponse<GrupoEmpleado>> asignarEmpleado(
             @PathVariable Long idGrupo,
             @RequestBody Map<String, Object> body) {
@@ -106,7 +106,7 @@ public class GrupoController {
     }
 
     @RequestMapping(value = "/Asignar_grupos/v1/asig_grupo/asignar/", method = {RequestMethod.POST, RequestMethod.PUT})
-    @PreAuthorize("hasAnyRole('ADMIN','CAPTURA')")
+    @PreAuthorize("@perm.has('GRUPOS_ASIGNAR')")
     public ResponseEntity<ApiResponse<GrupoEmpleado>> asignarEmpleado(@RequestBody Map<String, Object> body) {
         Long idGrupo = body.get("idGrupo") != null ? Long.valueOf(body.get("idGrupo").toString()) : null;
         Long idEmpleado = body.get("idEmpleado") != null ? Long.valueOf(body.get("idEmpleado").toString()) : null;
@@ -122,11 +122,13 @@ public class GrupoController {
     }
 
     @GetMapping("/{idGrupo}/reporte")
+    @PreAuthorize("@perm.has('GRUPOS_REPORTE')")
     public ResponseEntity<ApiResponse<List<GrupoEmpleado>>> reporte(@PathVariable Long idGrupo) {
         return ResponseEntity.ok(ApiResponse.exito(grupoService.reporteGrupo(idGrupo)));
     }
 
     @RequestMapping(value = "/Reporte_grupos/v1/reporte_grupo/getListChildCC/", method = {RequestMethod.GET, RequestMethod.PUT})
+    @PreAuthorize("@perm.has('GRUPOS_REPORTE')")
     public ResponseEntity<ApiResponse<List<GrupoEmpleado>>> reporteCompat(@RequestParam Long idGrupo) {
         return ResponseEntity.ok(ApiResponse.exito(grupoService.reporteGrupo(idGrupo)));
     }
@@ -171,6 +173,7 @@ public class GrupoController {
         }
 
         @PostMapping("/Asignar_grupos/v1/asig_grupo/procesarExcel")
+        @PreAuthorize("@perm.has('GRUPOS_ASIGNAR')")
         public ResponseEntity<ApiResponse<Map<String, Object>>> procesarExcelAsignacion(
             @RequestParam(required = false) String user,
             @RequestParam(required = false) String b64) {
@@ -183,6 +186,7 @@ public class GrupoController {
         }
 
         @GetMapping("/Reporte_grupos/v1/reporte_grupo/getExcel")
+        @PreAuthorize("@perm.has('GRUPOS_REPORTE')")
         public ResponseEntity<byte[]> getExcelReporte(@RequestParam(required = false) Long idGrupo) {
         List<GrupoEmpleado> data = idGrupo != null ? grupoService.reporteGrupo(idGrupo) : List.of();
         String csv = "numeroEmpleado,activo,fechaAsignacion,usuarioAsigno\n" +

@@ -33,7 +33,7 @@ public class CambioPasswordService {
         }
 
         int updated = dbdespensaJdbc.update(
-                "UPDATE corpusuarios SET usuariopwd = ?, usuariofechaexpirapwd = NOW(), usuariofechamodificacion = NOW() WHERE usuarioid = ?",
+            "UPDATE corpusuarios SET usuariopwd = ?, usuariofechaexpirapwd = NOW(), usuariofechamodificacion = NOW(), requiere_cambio_password = FALSE WHERE usuarioid = ?",
                 AuthService.toMd5(dto.getNuevoPassword()),
                 dto.getId()
         );
