@@ -14,7 +14,7 @@ services:
       - key: APP_JWT_SECRET
         sync: false
       - key: APP_DB_URL
-        value: jdbc:postgresql://dpg-d86bq4t7vvec73dki9vg-a/pida_dev
+        value: jdbc:postgresql://dpg-d86bq4t7vvec73dki9vg-a:5432/pida_dev
       - key: APP_DB_USER
         sync: false
       - key: APP_DB_PASSWORD
