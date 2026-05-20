@@ -13,11 +13,7 @@ import java.util.Optional;
 public interface CredencialRepository extends JpaRepository<Credencial, Long> {
 
     @Query(value = "SELECT t.*, " +
-            "CASE " +
-            "  WHEN t.tarjetacancelada IS TRUE THEN 'CANCELADA' " +
-            "  WHEN p.parametrosactiva IS TRUE THEN 'ACTIVA' " +
-            "  ELSE 'INACTIVA' " +
-            "END AS estado " +
+            "COALESCE(p.parametrosactiva, FALSE) AS parametrosactiva " +
             "FROM credencial_interna t " +
             "LEFT JOIN estado_credencial p ON p.parametrosid = t.parametrosid " +
             "WHERE CAST(t.tarjetaid AS VARCHAR) = :numeroCredencial AND t.clienteid = :clienteId AND t.consignatarioid = :consignatarioId LIMIT 1",
@@ -27,11 +23,7 @@ public interface CredencialRepository extends JpaRepository<Credencial, Long> {
                                                 @Param("consignatarioId") Long consignatarioId);
 
     @Query(value = "SELECT t.*, " +
-            "CASE " +
-            "  WHEN t.tarjetacancelada IS TRUE THEN 'CANCELADA' " +
-            "  WHEN p.parametrosactiva IS TRUE THEN 'ACTIVA' " +
-            "  ELSE 'INACTIVA' " +
-            "END AS estado " +
+            "COALESCE(p.parametrosactiva, FALSE) AS parametrosactiva " +
             "FROM credencial_interna t " +
             "LEFT JOIN estado_credencial p ON p.parametrosid = t.parametrosid " +
             "WHERE (:estado IS NULL OR :estado = '' OR " +

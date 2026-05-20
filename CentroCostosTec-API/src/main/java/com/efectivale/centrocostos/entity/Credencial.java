@@ -30,8 +30,11 @@ public class Credencial {
     @Column(name = "empleadonombre", nullable = false, length = 200)
     private String nombreEmpleado;
 
-    @Column(name = "estado", insertable = false, updatable = false)
+    @Transient
     private String estado;
+
+    @Column(name = "parametrosactiva", insertable = false, updatable = false)
+    private Boolean parametrosActiva;
 
     @Transient
     private Long idGrupo;
@@ -107,5 +110,15 @@ public class Credencial {
 
     public Long getIdCredencial() {
         return idCredencial;
+    }
+
+    public String getEstado() {
+        if (Boolean.TRUE.equals(credencialCancelada)) {
+            return "CANCELADA";
+        }
+        if (Boolean.TRUE.equals(parametrosActiva)) {
+            return "ACTIVA";
+        }
+        return "INACTIVA";
     }
 }
