@@ -118,18 +118,6 @@ const ALCALDIAS_CDMX: string[] = [
         <!-- Sección: Dirección -->
         <h6 class="text-secondary border-bottom pb-1 mb-3 mt-4">Dirección</h6>
         <div class="row g-3">
-          <div class="col-md-6">
-            <label class="form-label">Calle</label>
-            <input type="text" class="form-control" formControlName="calle">
-          </div>
-          <div class="col-md-3">
-            <label class="form-label">Núm. exterior</label>
-            <input type="text" class="form-control" formControlName="numeroExterior">
-          </div>
-          <div class="col-md-3">
-            <label class="form-label">Núm. interior</label>
-            <input type="text" class="form-control" formControlName="numeroInterior">
-          </div>
           <div class="col-md-4">
             <label class="form-label">Estado</label>
             <select class="form-select" formControlName="estado">
@@ -174,6 +162,18 @@ const ALCALDIAS_CDMX: string[] = [
           <div class="col-md-6">
             <label class="form-label">País</label>
             <input type="text" class="form-control" formControlName="pais" placeholder="México">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Calle</label>
+            <input type="text" class="form-control" formControlName="calle">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Núm. exterior</label>
+            <input type="text" class="form-control" formControlName="numeroExterior">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Núm. interior</label>
+            <input type="text" class="form-control" formControlName="numeroInterior">
           </div>
         </div>
 
@@ -277,28 +277,46 @@ export class RegistroEmpresaComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.http.get<Record<string, string[]>>('/assets/catalogos/cp-colonias.json').subscribe({
-      next: (data) => {
+    this.cargarCatalogoConFallback<Record<string, string[]>>(
+      ['assets/catalogos/cp-colonias.json', '/assets/catalogos/cp-colonias.json'],
+      (data) => {
         this.coloniasPorCp = data ?? {};
         this.actualizarColoniasPorCp(String(this.form.get('codigoPostal')?.value ?? ''));
       },
-      error: () => {
+      () => {
         this.coloniasPorCp = {};
       }
-    });
+    );
 
-    this.http.get<Record<string, string>>('/assets/catalogos/cp-estados.json').subscribe({
-      next: (data) => {
+    this.cargarCatalogoConFallback<Record<string, string>>(
+      ['assets/catalogos/cp-estados.json', '/assets/catalogos/cp-estados.json'],
+      (data) => {
         this.estadoPorCp = data ?? {};
         this.actualizarColoniasPorCp(String(this.form.get('codigoPostal')?.value ?? ''));
       },
-      error: () => {
+      () => {
         this.estadoPorCp = {};
       }
-    });
+    );
   }
 
   get f() { return this.form.controls; }
+
+  private cargarCatalogoConFallback<T>(paths: string[], onSuccess: (data: T) => void, onError: () => void): void {
+    const tryLoad = (index: number): void => {
+      if (index >= paths.length) {
+        onError();
+        return;
+      }
+
+      this.http.get<T>(paths[index]).subscribe({
+        next: (data) => onSuccess(data),
+        error: () => tryLoad(index + 1)
+      });
+    };
+
+    tryLoad(0);
+  }
 
   private actualizarMunicipios(estado: string): void {
     this.municipioLabel = estado === 'Ciudad de Mexico' ? 'Alcaldia' : 'Municipio';
@@ -328,6 +346,10 @@ export class RegistroEmpresaComponent implements OnInit {
     }
 
     this.coloniasDisponibles = this.coloniasPorCp[cpNormalizado] ?? [];
+    if (this.coloniasDisponibles.length === 0) {
+      const cpSinCeros = String(Number(cpNormalizado));
+      this.coloniasDisponibles = this.coloniasPorCp[cpSinCeros] ?? [];
+    }
 
     const estadoSeleccionado = String(this.form.get('estado')?.value ?? '').trim();
     const estadoEsperado = String(this.estadoPorCp[cpNormalizado] ?? '').trim();
