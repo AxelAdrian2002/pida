@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { ESTADOS_MX, MUNICIPIOS_POR_ESTADO } from './direccion-catalogo';
 
 @Component({
   selector: 'app-registro-empresa',
@@ -111,24 +112,46 @@ import { HttpClient } from '@angular/common/http';
             <input type="text" class="form-control" formControlName="numeroInterior">
           </div>
           <div class="col-md-4">
-            <label class="form-label">Colonia</label>
-            <input type="text" class="form-control" formControlName="colonia">
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">Municipio / Alcaldía</label>
-            <input type="text" class="form-control" formControlName="municipio">
-          </div>
-          <div class="col-md-4">
             <label class="form-label">Estado</label>
-            <input type="text" class="form-control" formControlName="estado">
+            <select class="form-select" formControlName="estado">
+              <option value="">Selecciona un estado</option>
+              <option *ngFor="let estadoItem of estadosMx" [value]="estadoItem">{{ estadoItem }}</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">{{ municipioLabel }}</label>
+            <ng-container *ngIf="municipiosDisponibles.length > 0; else municipioLibre">
+              <select class="form-select" formControlName="municipio">
+                <option value="">Selecciona {{ municipioLabel.toLowerCase() }}</option>
+                <option *ngFor="let municipioItem of municipiosDisponibles" [value]="municipioItem">{{ municipioItem }}</option>
+              </select>
+            </ng-container>
+            <ng-template #municipioLibre>
+              <input type="text" class="form-control" formControlName="municipio" [placeholder]="municipioLabel + ' (captura manual)'">
+            </ng-template>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Código postal</label>
+            <input type="text" class="form-control" formControlName="codigoPostal" maxlength="5" placeholder="Ej. 03100">
+            <div class="text-danger small" *ngIf="f['codigoPostal'].invalid && f['codigoPostal'].touched">Debe tener 5 dígitos</div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Colonia</label>
+            <ng-container *ngIf="coloniasDisponibles.length > 0; else coloniaLibre">
+              <select class="form-select" formControlName="colonia">
+                <option value="">Selecciona colonia</option>
+                <option *ngFor="let coloniaItem of coloniasDisponibles" [value]="coloniaItem">{{ coloniaItem }}</option>
+              </select>
+              <div class="form-text">Colonias sugeridas según el código postal.</div>
+            </ng-container>
+            <ng-template #coloniaLibre>
+              <input type="text" class="form-control" formControlName="colonia" placeholder="Colonia (captura manual)">
+              <div class="form-text">Si no aparece una lista, captura la colonia manualmente.</div>
+            </ng-template>
           </div>
           <div class="col-md-6">
             <label class="form-label">País</label>
             <input type="text" class="form-control" formControlName="pais" placeholder="México">
-          </div>
-          <div class="col-md-6">
-            <label class="form-label">Código postal</label>
-            <input type="text" class="form-control" formControlName="codigoPostal" maxlength="10">
           </div>
         </div>
 
@@ -176,13 +199,18 @@ import { HttpClient } from '@angular/common/http';
     }
   `]
 })
-export class RegistroEmpresaComponent {
+export class RegistroEmpresaComponent implements OnInit {
   form: FormGroup;
   loading = false;
   submitted = false;
   errorMsg = '';
   registroExitoso = false;
   codigoEmpresaCreada = '';
+  readonly estadosMx = ESTADOS_MX;
+  municipiosDisponibles: string[] = [];
+  coloniasDisponibles: string[] = [];
+  municipioLabel = 'Municipio';
+  private coloniasPorCp: Record<string, string[]> = {};
 
   constructor(private fb: FormBuilder, private http: HttpClient, private router: Router) {
     this.form = this.fb.group({
@@ -204,15 +232,67 @@ export class RegistroEmpresaComponent {
       municipio:        [''],
       estado:           [''],
       pais:             ['México'],
-      codigoPostal:     [''],
+      codigoPostal:     ['', [Validators.maxLength(5), Validators.pattern(/^$|^\d{5}$/)]],
       // Admin
       adminNombre:      ['', Validators.required],
       adminEmail:       ['', [Validators.required, Validators.email]],
       adminPassword:    ['', [Validators.required, Validators.minLength(6)]]
     });
+
+    this.form.get('estado')?.valueChanges.subscribe((estado) => {
+      this.actualizarMunicipios(String(estado ?? ''));
+      this.actualizarColoniasPorCp(String(this.form.get('codigoPostal')?.value ?? ''));
+    });
+
+    this.form.get('codigoPostal')?.valueChanges.subscribe((cp) => {
+      this.actualizarColoniasPorCp(String(cp ?? ''));
+    });
+
+    this.actualizarMunicipios(String(this.form.get('estado')?.value ?? ''));
+  }
+
+  ngOnInit(): void {
+    this.http.get<Record<string, string[]>>('assets/catalogos/cp-colonias.json').subscribe({
+      next: (data) => {
+        this.coloniasPorCp = data ?? {};
+        this.actualizarColoniasPorCp(String(this.form.get('codigoPostal')?.value ?? ''));
+      },
+      error: () => {
+        this.coloniasPorCp = {};
+      }
+    });
   }
 
   get f() { return this.form.controls; }
+
+  private actualizarMunicipios(estado: string): void {
+    this.municipiosDisponibles = MUNICIPIOS_POR_ESTADO[estado] ?? [];
+    this.municipioLabel = estado === 'Ciudad de Mexico' ? 'Alcaldía' : 'Municipio';
+
+    const municipioActual = String(this.form.get('municipio')?.value ?? '').trim();
+    if (municipioActual && this.municipiosDisponibles.length > 0 && !this.municipiosDisponibles.includes(municipioActual)) {
+      this.form.patchValue({ municipio: '' }, { emitEvent: false });
+    }
+  }
+
+  private actualizarColoniasPorCp(codigoPostal: string): void {
+    const cpNormalizado = codigoPostal.replace(/\D/g, '').slice(0, 5);
+    if (codigoPostal !== cpNormalizado) {
+      this.form.patchValue({ codigoPostal: cpNormalizado }, { emitEvent: false });
+    }
+
+    if (cpNormalizado.length < 5) {
+      this.coloniasDisponibles = [];
+      return;
+    }
+
+    this.coloniasDisponibles = this.coloniasPorCp[cpNormalizado] ?? [];
+
+    const coloniaActual = String(this.form.get('colonia')?.value ?? '').trim();
+    if (coloniaActual && this.coloniasDisponibles.length > 0 && !this.coloniasDisponibles.includes(coloniaActual)) {
+      this.form.patchValue({ colonia: '' }, { emitEvent: false });
+    }
+  }
 
   onSubmit(): void {
     this.submitted = true;
