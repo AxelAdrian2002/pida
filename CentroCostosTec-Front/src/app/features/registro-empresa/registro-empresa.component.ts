@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { ESTADOS_MX, MUNICIPIOS_POR_ESTADO } from './direccion-catalogo';
+import { CP_COLONIAS_POR_CP, CP_ESTADO_POR_CP } from './direccion-cp-catalogo';
 
 const ALCALDIAS_CDMX: string[] = [
   'Alvaro Obregon',
@@ -277,46 +278,12 @@ export class RegistroEmpresaComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.cargarCatalogoConFallback<Record<string, string[]>>(
-      ['assets/catalogos/cp-colonias.json', '/assets/catalogos/cp-colonias.json'],
-      (data) => {
-        this.coloniasPorCp = data ?? {};
-        this.actualizarColoniasPorCp(String(this.form.get('codigoPostal')?.value ?? ''));
-      },
-      () => {
-        this.coloniasPorCp = {};
-      }
-    );
-
-    this.cargarCatalogoConFallback<Record<string, string>>(
-      ['assets/catalogos/cp-estados.json', '/assets/catalogos/cp-estados.json'],
-      (data) => {
-        this.estadoPorCp = data ?? {};
-        this.actualizarColoniasPorCp(String(this.form.get('codigoPostal')?.value ?? ''));
-      },
-      () => {
-        this.estadoPorCp = {};
-      }
-    );
+    this.coloniasPorCp = CP_COLONIAS_POR_CP;
+    this.estadoPorCp = CP_ESTADO_POR_CP;
+    this.actualizarColoniasPorCp(String(this.form.get('codigoPostal')?.value ?? ''));
   }
 
   get f() { return this.form.controls; }
-
-  private cargarCatalogoConFallback<T>(paths: string[], onSuccess: (data: T) => void, onError: () => void): void {
-    const tryLoad = (index: number): void => {
-      if (index >= paths.length) {
-        onError();
-        return;
-      }
-
-      this.http.get<T>(paths[index]).subscribe({
-        next: (data) => onSuccess(data),
-        error: () => tryLoad(index + 1)
-      });
-    };
-
-    tryLoad(0);
-  }
 
   private actualizarMunicipios(estado: string): void {
     this.municipioLabel = estado === 'Ciudad de Mexico' ? 'Alcaldia' : 'Municipio';

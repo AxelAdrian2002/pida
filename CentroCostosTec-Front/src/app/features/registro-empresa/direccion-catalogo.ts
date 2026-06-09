@@ -748,6 +748,3 @@ export const MUNICIPIOS_POR_ESTADO: Record<string, string[]> = {
     'Zacatecas',
   ],
 };
-
-// El mapa completo CP->colonias vive en src/assets/catalogos/cp-colonias.json
-// para no inflar el bundle de JS en tiempo de compilacion.
