@@ -5,6 +5,25 @@ import { Router, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { ESTADOS_MX, MUNICIPIOS_POR_ESTADO } from './direccion-catalogo';
 
+const ALCALDIAS_CDMX: string[] = [
+  'Alvaro Obregon',
+  'Azcapotzalco',
+  'Benito Juarez',
+  'Coyoacan',
+  'Cuajimalpa de Morelos',
+  'Cuauhtemoc',
+  'Gustavo A. Madero',
+  'Iztacalco',
+  'Iztapalapa',
+  'La Magdalena Contreras',
+  'Miguel Hidalgo',
+  'Milpa Alta',
+  'Tlahuac',
+  'Tlalpan',
+  'Venustiano Carranza',
+  'Xochimilco'
+];
+
 @Component({
   selector: 'app-registro-empresa',
   standalone: true,
@@ -134,6 +153,9 @@ import { ESTADOS_MX, MUNICIPIOS_POR_ESTADO } from './direccion-catalogo';
             <label class="form-label">Código postal</label>
             <input type="text" class="form-control" formControlName="codigoPostal" maxlength="5" placeholder="Ej. 03100">
             <div class="text-danger small" *ngIf="f['codigoPostal'].invalid && f['codigoPostal'].touched">Debe tener 5 dígitos</div>
+            <div class="text-warning small" *ngIf="cpNoCoincideConEstado">
+              El codigo postal no corresponde al estado seleccionado. Para este CP, el estado esperado es: {{ estadoEsperadoPorCp }}.
+            </div>
           </div>
           <div class="col-md-6">
             <label class="form-label">Colonia</label>
@@ -211,6 +233,9 @@ export class RegistroEmpresaComponent implements OnInit {
   coloniasDisponibles: string[] = [];
   municipioLabel = 'Municipio';
   private coloniasPorCp: Record<string, string[]> = {};
+  private estadoPorCp: Record<string, string> = {};
+  cpNoCoincideConEstado = false;
+  estadoEsperadoPorCp = '';
 
   constructor(private fb: FormBuilder, private http: HttpClient, private router: Router) {
     this.form = this.fb.group({
@@ -252,7 +277,7 @@ export class RegistroEmpresaComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.http.get<Record<string, string[]>>('assets/catalogos/cp-colonias.json').subscribe({
+    this.http.get<Record<string, string[]>>('/assets/catalogos/cp-colonias.json').subscribe({
       next: (data) => {
         this.coloniasPorCp = data ?? {};
         this.actualizarColoniasPorCp(String(this.form.get('codigoPostal')?.value ?? ''));
@@ -261,13 +286,27 @@ export class RegistroEmpresaComponent implements OnInit {
         this.coloniasPorCp = {};
       }
     });
+
+    this.http.get<Record<string, string>>('/assets/catalogos/cp-estados.json').subscribe({
+      next: (data) => {
+        this.estadoPorCp = data ?? {};
+        this.actualizarColoniasPorCp(String(this.form.get('codigoPostal')?.value ?? ''));
+      },
+      error: () => {
+        this.estadoPorCp = {};
+      }
+    });
   }
 
   get f() { return this.form.controls; }
 
   private actualizarMunicipios(estado: string): void {
-    this.municipiosDisponibles = MUNICIPIOS_POR_ESTADO[estado] ?? [];
-    this.municipioLabel = estado === 'Ciudad de Mexico' ? 'Alcaldía' : 'Municipio';
+    this.municipioLabel = estado === 'Ciudad de Mexico' ? 'Alcaldia' : 'Municipio';
+    if (estado === 'Ciudad de Mexico') {
+      this.municipiosDisponibles = ALCALDIAS_CDMX;
+    } else {
+      this.municipiosDisponibles = MUNICIPIOS_POR_ESTADO[estado] ?? [];
+    }
 
     const municipioActual = String(this.form.get('municipio')?.value ?? '').trim();
     if (municipioActual && this.municipiosDisponibles.length > 0 && !this.municipiosDisponibles.includes(municipioActual)) {
@@ -283,10 +322,17 @@ export class RegistroEmpresaComponent implements OnInit {
 
     if (cpNormalizado.length < 5) {
       this.coloniasDisponibles = [];
+      this.cpNoCoincideConEstado = false;
+      this.estadoEsperadoPorCp = '';
       return;
     }
 
     this.coloniasDisponibles = this.coloniasPorCp[cpNormalizado] ?? [];
+
+    const estadoSeleccionado = String(this.form.get('estado')?.value ?? '').trim();
+    const estadoEsperado = String(this.estadoPorCp[cpNormalizado] ?? '').trim();
+    this.estadoEsperadoPorCp = estadoEsperado;
+    this.cpNoCoincideConEstado = !!estadoSeleccionado && !!estadoEsperado && estadoSeleccionado !== estadoEsperado;
 
     const coloniaActual = String(this.form.get('colonia')?.value ?? '').trim();
     if (coloniaActual && this.coloniasDisponibles.length > 0 && !this.coloniasDisponibles.includes(coloniaActual)) {
