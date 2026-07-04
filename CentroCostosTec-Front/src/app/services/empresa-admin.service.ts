@@ -51,6 +51,26 @@ export class EmpresaAdminService {
     return this.http.put<ApiResponse<EmpresaConfiguracion>>(`${this.API}/configuracion`, payload);
   }
 
+  obtenerPerfil(): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(`${this.API}/perfil`);
+  }
+
+  guardarPerfil(payload: { perfil: { curp?: string; rfc?: string; fotoUrl?: string } }): Observable<ApiResponse<any>> {
+    return this.http.put<ApiResponse<any>>(`${this.API}/perfil`, payload);
+  }
+
+  subirLogoEmpresa(file: File): Observable<ApiResponse<{ url: string; publicId: string }>> {
+    const form = new FormData();
+    form.append('file', file);
+    return this.http.post<ApiResponse<{ url: string; publicId: string }>>(`${this.API}/media/logo`, form);
+  }
+
+  subirFotoPerfil(file: File): Observable<ApiResponse<{ url: string; publicId: string }>> {
+    const form = new FormData();
+    form.append('file', file);
+    return this.http.post<ApiResponse<{ url: string; publicId: string }>>(`${this.API}/media/perfil`, form);
+  }
+
   aplicarBranding(configuracion?: EmpresaConfiguracion | null): void {
     const empresa = configuracion?.empresa;
     const root = document.documentElement;

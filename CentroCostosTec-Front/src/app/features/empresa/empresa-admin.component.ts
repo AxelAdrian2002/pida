@@ -190,7 +190,13 @@ interface AsignacionAutomaticaResumen {
           </div>
           <div class="col-md-6">
             <label class="form-label fw-semibold">Logo URL</label>
-            <input class="form-control" [(ngModel)]="configuracion.empresa.logoUrl" name="logoUrl" placeholder="https://...">
+            <input class="form-control mb-2" [(ngModel)]="configuracion.empresa.logoUrl" name="logoUrl" placeholder="https://...">
+            <div class="d-flex gap-2 align-items-center">
+              <input type="file" class="form-control" accept="image/*" (change)="onLogoEmpresaSelected($event)">
+              <button type="button" class="btn btn-outline-primary" (click)="subirLogoEmpresa()" [disabled]="!logoEmpresaFile || subiendoLogoEmpresa">
+                {{ subiendoLogoEmpresa ? 'Subiendo...' : 'Subir logo' }}
+              </button>
+            </div>
           </div>
           <div class="col-12">
             <div class="brand-preview p-3 rounded-4 d-flex align-items-center justify-content-between flex-wrap gap-3"
@@ -292,7 +298,13 @@ interface AsignacionAutomaticaResumen {
           </div>
           <div class="col-md-4">
             <label class="form-label fw-semibold">Foto URL</label>
-            <input class="form-control" [(ngModel)]="configuracion.perfil.fotoUrl" name="fotoUrl" placeholder="https://...">
+            <input class="form-control mb-2" [(ngModel)]="configuracion.perfil.fotoUrl" name="fotoUrl" placeholder="https://...">
+            <div class="d-flex gap-2 align-items-center">
+              <input type="file" class="form-control" accept="image/*" (change)="onFotoPerfilSelected($event)">
+              <button type="button" class="btn btn-outline-primary" (click)="subirFotoPerfil()" [disabled]="!fotoPerfilFile || subiendoFotoPerfil">
+                {{ subiendoFotoPerfil ? 'Subiendo...' : 'Subir foto' }}
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -367,6 +379,10 @@ export class EmpresaAdminComponent implements OnInit {
   loteCantidad = 100;
   loteInicio: number | null = null;
   guardandoConfiguracion = false;
+  subiendoLogoEmpresa = false;
+  subiendoFotoPerfil = false;
+  logoEmpresaFile: File | null = null;
+  fotoPerfilFile: File | null = null;
   exitoMsg = '';
   errorMsg = '';
 
@@ -587,6 +603,67 @@ export class EmpresaAdminComponent implements OnInit {
       },
       complete: () => {
         this.guardandoConfiguracion = false;
+      }
+    });
+  }
+
+  onLogoEmpresaSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.logoEmpresaFile = input.files && input.files.length > 0 ? input.files[0] : null;
+  }
+
+  onFotoPerfilSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.fotoPerfilFile = input.files && input.files.length > 0 ? input.files[0] : null;
+  }
+
+  subirLogoEmpresa(): void {
+    if (!this.logoEmpresaFile) {
+      return;
+    }
+
+    this.subiendoLogoEmpresa = true;
+    this.errorMsg = '';
+
+    this.empresaAdminService.subirLogoEmpresa(this.logoEmpresaFile).subscribe({
+      next: res => {
+        const url = String(res?.datos?.url || '');
+        if (url) {
+          this.configuracion.empresa.logoUrl = url;
+          this.empresaAdminService.aplicarBranding(this.configuracion);
+          this.exitoMsg = 'Logo actualizado correctamente.';
+        }
+      },
+      error: err => {
+        this.errorMsg = err?.error?.mensaje || 'No fue posible subir el logo';
+      },
+      complete: () => {
+        this.subiendoLogoEmpresa = false;
+      }
+    });
+  }
+
+  subirFotoPerfil(): void {
+    if (!this.fotoPerfilFile) {
+      return;
+    }
+
+    this.subiendoFotoPerfil = true;
+    this.errorMsg = '';
+
+    this.empresaAdminService.subirFotoPerfil(this.fotoPerfilFile).subscribe({
+      next: res => {
+        const url = String(res?.datos?.url || '');
+        if (url) {
+          this.configuracion.perfil.fotoUrl = url;
+          this.exitoMsg = 'Foto de perfil actualizada correctamente.';
+        }
+      },
+      error: err => {
+        this.errorMsg = err?.error?.mensaje || 'No fue posible subir la foto de perfil';
+      },
+      complete: () => {
+        this.subiendoFotoPerfil = false;
       }
     });
   }

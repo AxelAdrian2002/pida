@@ -761,14 +761,13 @@ public class SolicitudService {
 
             Row total = sheet.createRow(2);
             total.createCell(0).setCellValue("TOTAL");
-            total.createCell(1).setCellFormula("SUM(E5:E50000)");
+            total.createCell(1).setCellFormula("SUM(D5:D50000)");
 
             Row header = sheet.createRow(3);
-            header.createCell(0).setCellValue("Centro Costos");
-            header.createCell(1).setCellValue("Cliente");
-            header.createCell(2).setCellValue("Tipo Pedido");
-            header.createCell(3).setCellValue("Numero");
-            header.createCell(4).setCellValue("Importe");
+            header.createCell(0).setCellValue("Cliente");
+            header.createCell(1).setCellValue("Tipo Pedido");
+            header.createCell(2).setCellValue("Numero");
+            header.createCell(3).setCellValue("Importe");
 
             List<String> empleados = pddespensaJdbc.query(
                     "SELECT tnuec FROM tmemp WHERE tnucl = ? AND tnuco = ? AND tbist = 'A' ORDER BY tidem",
@@ -780,14 +779,13 @@ public class SolicitudService {
             int row = 4;
             for (String empleado : empleados) {
                 Row r = sheet.createRow(row++);
-                r.createCell(0).setCellValue(centroId != null ? centroId : "");
-                r.createCell(1).setCellValue(clienteId + "-" + consignatarioId);
-                r.createCell(2).setCellValue("DISPERSION");
-                r.createCell(3).setCellValue(empleado != null ? empleado.trim() : "");
-                r.createCell(4).setCellValue(0d);
+                r.createCell(0).setCellValue(clienteId + "-" + consignatarioId);
+                r.createCell(1).setCellValue("DISPERSION");
+                r.createCell(2).setCellValue(empleado != null ? empleado.trim() : "");
+                r.createCell(3).setCellValue(0d);
             }
 
-            for (int i = 0; i <= 5; i++) {
+            for (int i = 0; i <= 4; i++) {
                 sheet.autoSizeColumn(i);
             }
 
@@ -833,10 +831,10 @@ public class SolicitudService {
                     continue;
                 }
 
-                String numero = cellAsString(row.getCell(3), formatter);
-                String clienteCell = cellAsString(row.getCell(1), formatter);
-                String tipoPedido = cellAsString(row.getCell(2), formatter).toUpperCase();
-                Double importe = cellAsDouble(row.getCell(4), formatter);
+                String numero = cellAsString(row.getCell(2), formatter);
+                String clienteCell = cellAsString(row.getCell(0), formatter);
+                String tipoPedido = cellAsString(row.getCell(1), formatter).toUpperCase();
+                Double importe = cellAsDouble(row.getCell(3), formatter);
 
                 if (isBlank(numero) && (importe == null || importe == 0d)) {
                     continue;
@@ -861,7 +859,7 @@ public class SolicitudService {
 
                 if (!errores.isEmpty()) {
                     hayErrores = true;
-                    row.createCell(5).setCellValue(String.join(" | ", errores));
+                    row.createCell(4).setCellValue(String.join(" | ", errores));
                     continue;
                 }
 
@@ -877,13 +875,13 @@ public class SolicitudService {
             if (totalCapturado != null && Math.abs(totalCapturado - sumaImportes) > 0.01d) {
                 hayErrores = true;
                 Row totalRow = hoja.getRow(2) != null ? hoja.getRow(2) : hoja.createRow(2);
-                totalRow.createCell(5).setCellValue("El TOTAL no coincide con la suma de importes");
+                totalRow.createCell(4).setCellValue("El TOTAL no coincide con la suma de importes");
             }
 
             if (detalles.isEmpty()) {
                 hayErrores = true;
                 Row header = hoja.getRow(3) != null ? hoja.getRow(3) : hoja.createRow(3);
-                header.createCell(5).setCellValue("Sin registros validos para procesar");
+                header.createCell(4).setCellValue("Sin registros validos para procesar");
             }
 
             if (hayErrores) {

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
@@ -127,8 +127,13 @@ import { EmpresaAdminService } from '../../services/empresa-admin.service';
           <small class="section-label text-uppercase px-3">Perfil</small>
         </li>
         <li class="nav-item" *ngIf="canAny('ADMIN','CAPTURA','AUTORIZADOR','CONSULTA')">
+          <a class="nav-link" routerLink="/perfil/configuracion" routerLinkActive="active">
+            <i class="fas fa-user-cog me-2"></i><span>Configuracion de datos</span>
+          </a>
+        </li>
+        <li class="nav-item" *ngIf="canAny('ADMIN','CAPTURA','AUTORIZADOR','CONSULTA')">
           <a class="nav-link" routerLink="/Administracion_Login/Cambio_Password" routerLinkActive="active">
-            <i class="fas fa-key me-2"></i><span>Cambiar Contraseña</span>
+            <i class="fas fa-key me-2"></i><span>Cambiar Contrasenia</span>
           </a>
         </li>
       </ul>
@@ -157,10 +162,25 @@ import { EmpresaAdminService } from '../../services/empresa-admin.service';
           <button class="btn btn-sm btn-light d-lg-none" type="button" (click)="toggleSidebar()" aria-label="Alternar menú lateral">
             <i class="fas fa-bars"></i>
           </button>
-          <small class="d-none d-md-inline">{{ user?.nombreCompleto || user?.username }}</small>
-          <button class="btn btn-sm btn-light" (click)="logout()">
-            <i class="fas fa-sign-out-alt me-1"></i>Cerrar sesión
-          </button>
+          <div class="user-menu-wrapper">
+            <button class="user-menu-btn" type="button" (click)="toggleUserMenu($event)" aria-label="Menú de usuario">
+              <img *ngIf="fotoPerfilUrl" [src]="fotoPerfilUrl" alt="Foto de perfil" class="user-avatar">
+              <span *ngIf="!fotoPerfilUrl" class="user-avatar user-avatar-fallback">{{ inicialesUsuario }}</span>
+              <span class="user-name d-none d-md-inline">{{ user?.nombreCompleto || user?.username }}</span>
+              <i class="fas fa-chevron-down small"></i>
+            </button>
+            <div class="user-menu-dropdown" *ngIf="userMenuOpen">
+              <button type="button" class="user-menu-item" (click)="irConfiguracionPerfil()">
+                <i class="fas fa-user-cog me-2"></i>Configuracion de datos
+              </button>
+              <button type="button" class="user-menu-item" (click)="irCambioContrasenia()">
+                <i class="fas fa-key me-2"></i>Cambiar contrasenia
+              </button>
+              <button type="button" class="user-menu-item text-danger" (click)="logout()">
+                <i class="fas fa-sign-out-alt me-2"></i>Cerrar sesión
+              </button>
+            </div>
+          </div>
         </div>
       </header>
       <router-outlet />
@@ -339,6 +359,74 @@ import { EmpresaAdminService } from '../../services/empresa-admin.service';
       display: none;
     }
 
+    .user-menu-wrapper {
+      position: relative;
+    }
+
+    .user-menu-btn {
+      border: 0;
+      background: #ffffff;
+      color: #0f172a;
+      border-radius: 999px;
+      padding: .2rem .7rem .2rem .2rem;
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      font-weight: 600;
+    }
+
+    .user-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #e2e8f0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .8rem;
+      font-weight: 700;
+    }
+
+    .user-avatar-fallback {
+      color: #0f172a;
+    }
+
+    .user-name {
+      max-width: 220px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .user-menu-dropdown {
+      position: absolute;
+      right: 0;
+      top: calc(100% + 8px);
+      min-width: 220px;
+      background: #ffffff;
+      border-radius: .75rem;
+      box-shadow: 0 10px 30px rgba(2, 6, 23, .16);
+      border: 1px solid #e2e8f0;
+      padding: .35rem;
+      z-index: 25;
+    }
+
+    .user-menu-item {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      text-align: left;
+      padding: .55rem .65rem;
+      border-radius: .5rem;
+      color: #0f172a;
+      font-weight: 500;
+    }
+
+    .user-menu-item:hover {
+      background: #f1f5f9;
+    }
+
     @media (max-width: 991.98px) {
       .sidebar {
         position: fixed;
@@ -362,9 +450,23 @@ export class LayoutComponent implements OnInit {
   solicitudesSubmenuOpen = true;
   nombreEmpresa = 'Plataforma Interna';
   logoUrl = '';
+  fotoPerfilUrl = '';
+  userMenuOpen = false;
   fechaActual = new Date().toLocaleDateString('es-MX', {
     weekday: 'long', year: 'numeric', month: 'long', day: '2-digit'
   });
+
+  get inicialesUsuario(): string {
+    const nombre = String(this.user?.nombreCompleto || this.user?.username || 'US').trim();
+    const partes = nombre.split(/\s+/).filter(Boolean);
+    if (partes.length === 0) {
+      return 'US';
+    }
+    if (partes.length === 1) {
+      return partes[0].slice(0, 2).toUpperCase();
+    }
+    return (partes[0][0] + partes[1][0]).toUpperCase();
+  }
 
   get centroNombre(): string {
     return this.user?.centroNombre || this.user?.rs_centronombre || this.user?.centroId || this.user?.rs_centroid || 'Operaciones Internas';
@@ -419,17 +521,47 @@ export class LayoutComponent implements OnInit {
       return;
     }
 
-    this.empresaAdminService.obtenerConfiguracion().subscribe({
+    if (this.canAny('ADMIN')) {
+      this.empresaAdminService.obtenerConfiguracion().subscribe({
+        next: res => {
+          const configuracion = res?.datos;
+          this.nombreEmpresa = configuracion?.empresa?.nombreEmpresa || this.nombreEmpresa;
+          this.logoUrl = configuracion?.empresa?.logoUrl || '';
+          this.fotoPerfilUrl = configuracion?.perfil?.fotoUrl || this.fotoPerfilUrl;
+          this.empresaAdminService.aplicarBranding(configuracion);
+        }
+      });
+    }
+
+    this.empresaAdminService.obtenerPerfil().subscribe({
       next: res => {
-        const configuracion = res?.datos;
-        this.nombreEmpresa = configuracion?.empresa?.nombreEmpresa || this.nombreEmpresa;
-        this.logoUrl = configuracion?.empresa?.logoUrl || '';
-        this.empresaAdminService.aplicarBranding(configuracion);
+        this.fotoPerfilUrl = res?.datos?.fotoUrl || this.fotoPerfilUrl;
       }
     });
   }
 
+  @HostListener('document:click')
+  onDocumentClick(): void {
+    this.userMenuOpen = false;
+  }
+
+  toggleUserMenu(event: MouseEvent): void {
+    event.stopPropagation();
+    this.userMenuOpen = !this.userMenuOpen;
+  }
+
+  irConfiguracionPerfil(): void {
+    this.userMenuOpen = false;
+    this.router.navigate(['/perfil/configuracion']);
+  }
+
+  irCambioContrasenia(): void {
+    this.userMenuOpen = false;
+    this.router.navigate(['/Administracion_Login/Cambio_Password']);
+  }
+
   logout(): void {
+    this.userMenuOpen = false;
     this.authService.logout();
     this.router.navigate(['/login']);
   }

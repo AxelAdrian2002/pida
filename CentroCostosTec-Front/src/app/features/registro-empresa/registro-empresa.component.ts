@@ -99,8 +99,14 @@ const ALCALDIAS_CDMX: string[] = [
             </div>
           </div>
           <div class="col-md-6">
-            <label class="form-label">URL del logo</label>
-            <input type="text" class="form-control" formControlName="logoUrl" placeholder="https://miweb.com/logo.png">
+            <label class="form-label">Logo de la empresa</label>
+            <div class="d-flex gap-2 align-items-center">
+              <input type="file" class="form-control" accept="image/*" (change)="onLogoSelected($event)">
+              <button type="button" class="btn btn-outline-primary" (click)="subirLogoSeleccionado()" [disabled]="!logoFile || subiendoLogo">
+                {{ subiendoLogo ? 'Subiendo...' : 'Subir logo' }}
+              </button>
+            </div>
+            <div class="form-text" *ngIf="logoSubidoMsg">{{ logoSubidoMsg }}</div>
           </div>
           <!-- Preview de colores -->
           <div class="col-12">
@@ -227,6 +233,9 @@ export class RegistroEmpresaComponent implements OnInit {
   loading = false;
   submitted = false;
   errorMsg = '';
+  logoSubidoMsg = '';
+  logoFile: File | null = null;
+  subiendoLogo = false;
   registroExitoso = false;
   codigoEmpresaCreada = '';
   readonly estadosMx = ESTADOS_MX;
@@ -344,6 +353,41 @@ export class RegistroEmpresaComponent implements OnInit {
       error: (err) => {
         this.errorMsg = err?.error?.mensaje ?? err?.error?.message ?? 'Error al registrar la empresa. Intenta de nuevo.';
         this.loading = false;
+      }
+    });
+  }
+
+  onLogoSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.logoFile = input.files && input.files.length > 0 ? input.files[0] : null;
+    this.logoSubidoMsg = '';
+  }
+
+  subirLogoSeleccionado(): void {
+    if (!this.logoFile) {
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', this.logoFile);
+    this.subiendoLogo = true;
+    this.logoSubidoMsg = '';
+
+    this.http.post<any>('/api/auth/media/upload', formData).subscribe({
+      next: (res) => {
+        const url = String(res?.datos?.url || '');
+        if (url) {
+          this.form.patchValue({ logoUrl: url });
+          this.logoSubidoMsg = 'Logo subido correctamente.';
+        } else {
+          this.errorMsg = 'No se recibió la URL del logo.';
+        }
+      },
+      error: (err) => {
+        this.errorMsg = err?.error?.mensaje ?? 'No fue posible subir el logo.';
+      },
+      complete: () => {
+        this.subiendoLogo = false;
       }
     });
   }

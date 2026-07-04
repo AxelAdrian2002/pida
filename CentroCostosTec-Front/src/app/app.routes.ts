@@ -92,6 +92,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/empresa/empresa-admin.component').then(m => m.EmpresaAdminComponent)
       },
       {
+        path: 'perfil/configuracion',
+        loadComponent: () => import('./features/perfil/perfil-config.component').then(m => m.PerfilConfigComponent)
+      },
+      {
         path: 'cambio-contrasenia',
         loadComponent: () => import('./features/admin-login/cambiar-password/cambiar-password.component').then(m => m.CambiarPasswordComponent)
       },

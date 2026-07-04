@@ -112,6 +112,40 @@ public class EmpresaAdminService {
         return out;
     }
 
+    public Map<String, Object> obtenerPerfilActual() {
+        Long idUsuario = contextProvider.getIdUsuario();
+        return obtenerPerfilPorUsuarioId(idUsuario);
+    }
+
+    @Transactional
+    public Map<String, Object> guardarPerfilActual(Map<String, Object> payload) {
+        Long idUsuario = contextProvider.getIdUsuario();
+        Map<String, Object> perfil = castMap(payload.get("perfil"));
+
+        if (perfil.isEmpty()) {
+            perfil = payload;
+        }
+
+        jdbc.update(
+            "INSERT INTO usuario_perfil (usuarioid, curp, rfc, foto_url, fecha_modificacion) VALUES (?, ?, ?, ?, NOW()) "
+                + "ON CONFLICT (usuarioid) DO UPDATE SET curp = EXCLUDED.curp, rfc = EXCLUDED.rfc, "
+                + "foto_url = EXCLUDED.foto_url, fecha_modificacion = NOW()",
+            idUsuario,
+            toStr(perfil.get("curp")),
+            toStr(perfil.get("rfc")),
+            toStr(perfil.get("fotoUrl"))
+        );
+
+        tenantAuditService.logFromContext(
+            "USUARIO",
+            "GUARDAR_PERFIL",
+            "Perfil del usuario actualizado",
+            contextProvider
+        );
+
+        return obtenerPerfilPorUsuarioId(idUsuario);
+    }
+
     @Transactional
     public Map<String, Object> guardarConfiguracion(Map<String, Object> payload) {
         String corporativoId = contextProvider.getCorporativoId();
@@ -811,5 +845,28 @@ public class EmpresaAdminService {
         } catch (Exception ex) {
             return 0;
         }
+    }
+
+    private Map<String, Object> obtenerPerfilPorUsuarioId(Long idUsuario) {
+        return jdbc.query(
+            "SELECT up.curp, up.rfc, up.foto_url, u.usuarionombre, u.usuariocorreo "
+                + "FROM usuario_interno u "
+                + "LEFT JOIN usuario_perfil up ON up.usuarioid = u.usuarioid "
+                + "WHERE u.usuarioid = ?",
+            rs -> {
+                if (!rs.next()) {
+                    return Map.of();
+                }
+
+                Map<String, Object> perfilMap = new HashMap<>();
+                perfilMap.put("nombre", nullSafe(rs.getString("usuarionombre")));
+                perfilMap.put("email", nullSafe(rs.getString("usuariocorreo")));
+                perfilMap.put("curp", nullSafe(rs.getString("curp")));
+                perfilMap.put("rfc", nullSafe(rs.getString("rfc")));
+                perfilMap.put("fotoUrl", nullSafe(rs.getString("foto_url")));
+                return perfilMap;
+            },
+            idUsuario
+        );
     }
 }

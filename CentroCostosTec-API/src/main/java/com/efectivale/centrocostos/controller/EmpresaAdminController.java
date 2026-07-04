@@ -1,6 +1,7 @@
 package com.efectivale.centrocostos.controller;
 
 import com.efectivale.centrocostos.dto.ApiResponse;
+import com.efectivale.centrocostos.service.CloudinaryStorageService;
 import com.efectivale.centrocostos.service.EmpresaAdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -25,6 +26,7 @@ import java.util.Map;
 public class EmpresaAdminController {
 
     private final EmpresaAdminService empresaAdminService;
+    private final CloudinaryStorageService cloudinaryStorageService;
 
     @GetMapping("/plantilla-empleados")
     @PreAuthorize("@perm.has('EMPLEADOS_IMPORTAR')")
@@ -116,5 +118,35 @@ public class EmpresaAdminController {
     @PreAuthorize("@perm.has('EMPRESA_CONFIG_EDITAR')")
     public ResponseEntity<ApiResponse<Map<String, Object>>> guardarConfiguracion(@RequestBody Map<String, Object> payload) {
         return ResponseEntity.ok(ApiResponse.exito("Configuracion guardada", empresaAdminService.guardarConfiguracion(payload)));
+    }
+
+    @GetMapping("/perfil")
+    @PreAuthorize("hasAnyRole('ADMIN','CAPTURA','AUTORIZADOR','CONSULTA')")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> obtenerPerfilActual() {
+        return ResponseEntity.ok(ApiResponse.exito(empresaAdminService.obtenerPerfilActual()));
+    }
+
+    @PutMapping("/perfil")
+    @PreAuthorize("hasAnyRole('ADMIN','CAPTURA','AUTORIZADOR','CONSULTA')")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> guardarPerfilActual(@RequestBody Map<String, Object> payload) {
+        return ResponseEntity.ok(ApiResponse.exito("Perfil guardado", empresaAdminService.guardarPerfilActual(payload)));
+    }
+
+    @PostMapping(path = "/media/logo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("@perm.has('EMPRESA_CONFIG_EDITAR')")
+    public ResponseEntity<ApiResponse<Map<String, String>>> subirLogoEmpresa(@RequestParam("file") MultipartFile file) {
+        return ResponseEntity.ok(ApiResponse.exito(
+            "Logo cargado correctamente",
+            cloudinaryStorageService.uploadImage(file, "empresa/logo")
+        ));
+    }
+
+    @PostMapping(path = "/media/perfil", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAnyRole('ADMIN','CAPTURA','AUTORIZADOR','CONSULTA')")
+    public ResponseEntity<ApiResponse<Map<String, String>>> subirFotoPerfil(@RequestParam("file") MultipartFile file) {
+        return ResponseEntity.ok(ApiResponse.exito(
+            "Foto de perfil cargada correctamente",
+            cloudinaryStorageService.uploadImage(file, "perfil")
+        ));
     }
 }
