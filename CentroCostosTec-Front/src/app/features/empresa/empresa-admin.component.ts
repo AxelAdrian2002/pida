@@ -596,6 +596,7 @@ export class EmpresaAdminComponent implements OnInit {
       next: res => {
         this.configuracion = res.datos || this.configuracion;
         this.empresaAdminService.aplicarBranding(this.configuracion);
+        this.empresaAdminService.actualizarFotoPerfil(this.configuracion?.perfil?.fotoUrl);
         this.exitoMsg = res?.mensaje || 'Configuracion guardada';
       },
       error: err => {
@@ -656,6 +657,7 @@ export class EmpresaAdminComponent implements OnInit {
         const url = String(res?.datos?.url || '');
         if (url) {
           this.configuracion.perfil.fotoUrl = url;
+          this.empresaAdminService.actualizarFotoPerfil(url);
           this.exitoMsg = 'Foto de perfil actualizada correctamente.';
         }
       },

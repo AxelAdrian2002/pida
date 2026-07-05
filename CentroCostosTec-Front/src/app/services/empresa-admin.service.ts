@@ -1,12 +1,31 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { ApiResponse, EmpresaConfiguracion } from '../models/models';
+
+interface BrandingState {
+  nombreEmpresa: string;
+  logoUrl: string;
+}
+
+interface PerfilState {
+  fotoUrl: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class EmpresaAdminService {
   private readonly API = '/api/empresas/v1';
   private readonly BRANDING_KEY = 'cc_branding';
+  private readonly brandingSubject = new BehaviorSubject<BrandingState>({
+    nombreEmpresa: 'Plataforma Interna',
+    logoUrl: ''
+  });
+  private readonly perfilSubject = new BehaviorSubject<PerfilState>({
+    fotoUrl: ''
+  });
+
+  readonly branding$ = this.brandingSubject.asObservable();
+  readonly perfil$ = this.perfilSubject.asObservable();
 
   constructor(private http: HttpClient) {}
 
@@ -71,6 +90,12 @@ export class EmpresaAdminService {
     return this.http.post<ApiResponse<{ url: string; publicId: string }>>(`${this.API}/media/perfil`, form);
   }
 
+  actualizarFotoPerfil(fotoUrl?: string | null): void {
+    this.perfilSubject.next({
+      fotoUrl: (fotoUrl || '').trim()
+    });
+  }
+
   aplicarBranding(configuracion?: EmpresaConfiguracion | null): void {
     const empresa = configuracion?.empresa;
     const root = document.documentElement;
@@ -92,6 +117,11 @@ export class EmpresaAdminService {
       logoUrl,
       nombreEmpresa
     }));
+
+    this.brandingSubject.next({
+      nombreEmpresa,
+      logoUrl
+    });
   }
 
   aplicarBrandingGuardado(): { nombreEmpresa: string; logoUrl: string } | null {

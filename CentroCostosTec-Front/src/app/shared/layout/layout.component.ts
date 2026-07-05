@@ -511,6 +511,15 @@ export class LayoutComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.empresaAdminService.branding$.subscribe(branding => {
+      this.nombreEmpresa = branding?.nombreEmpresa || this.nombreEmpresa;
+      this.logoUrl = branding?.logoUrl || this.logoUrl;
+    });
+
+    this.empresaAdminService.perfil$.subscribe(perfil => {
+      this.fotoPerfilUrl = perfil?.fotoUrl || this.fotoPerfilUrl;
+    });
+
     const branding = this.empresaAdminService.aplicarBrandingGuardado();
     if (branding) {
       this.nombreEmpresa = branding.nombreEmpresa;
@@ -529,6 +538,7 @@ export class LayoutComponent implements OnInit {
           this.logoUrl = configuracion?.empresa?.logoUrl || '';
           this.fotoPerfilUrl = configuracion?.perfil?.fotoUrl || this.fotoPerfilUrl;
           this.empresaAdminService.aplicarBranding(configuracion);
+          this.empresaAdminService.actualizarFotoPerfil(this.fotoPerfilUrl);
         }
       });
     }
@@ -536,6 +546,7 @@ export class LayoutComponent implements OnInit {
     this.empresaAdminService.obtenerPerfil().subscribe({
       next: res => {
         this.fotoPerfilUrl = res?.datos?.fotoUrl || this.fotoPerfilUrl;
+        this.empresaAdminService.actualizarFotoPerfil(this.fotoPerfilUrl);
       }
     });
   }
