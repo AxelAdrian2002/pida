@@ -199,6 +199,15 @@ import { EmpresaAdminService } from '../../services/empresa-admin.service';
       position: relative;
       z-index: 5;
       background: var(--brand-secondary) !important;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .sidebar .nav {
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-width: thin;
     }
 
     .brand-logo {

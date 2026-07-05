@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import * as L from 'leaflet';
 import { ESTADOS_MX, MUNICIPIOS_POR_ESTADO } from './direccion-catalogo';
 import { CP_COLONIAS_POR_CP, CP_ESTADO_POR_CP } from './direccion-cp-catalogo';
 
@@ -182,6 +183,13 @@ const ALCALDIAS_CDMX: string[] = [
             <label class="form-label">Núm. interior</label>
             <input type="text" class="form-control" formControlName="numeroInterior">
           </div>
+          <div class="col-12 d-flex justify-content-between align-items-center">
+            <small class="text-muted">Selecciona un punto en el mapa para autocompletar dirección o escribe dirección para ubicarla.</small>
+            <button type="button" class="btn btn-sm btn-outline-secondary" (click)="onMapaBuscarDesdeCampos()">Ubicar en mapa</button>
+          </div>
+          <div class="col-12">
+            <div #mapContainer class="registro-map"></div>
+          </div>
         </div>
 
         <!-- Sección: Administrador -->
@@ -226,9 +234,18 @@ const ALCALDIAS_CDMX: string[] = [
     .registro-bg {
       background: linear-gradient(135deg, #f0f4ff 0%, #e8f5e9 100%);
     }
+
+    .registro-map {
+      width: 100%;
+      height: 320px;
+      border: 1px solid #ced4da;
+      border-radius: .75rem;
+      overflow: hidden;
+    }
   `]
 })
-export class RegistroEmpresaComponent implements OnInit {
+export class RegistroEmpresaComponent implements OnInit, AfterViewInit, OnDestroy {
+  @ViewChild('mapContainer') mapContainerRef?: ElementRef<HTMLDivElement>;
   form: FormGroup;
   loading = false;
   submitted = false;
@@ -244,6 +261,12 @@ export class RegistroEmpresaComponent implements OnInit {
   municipioLabel = 'Municipio';
   private coloniasPorCp: Record<string, string[]> = {};
   private estadoPorCp: Record<string, string> = {};
+  private map?: L.Map;
+  private marker?: L.CircleMarker;
+  private geocodeTimer: ReturnType<typeof setTimeout> | null = null;
+  private mapReady = false;
+  private blockFieldDrivenGeocode = false;
+  private readonly initialCoords: [number, number] = [19.4326, -99.1332];
   cpNoCoincideConEstado = false;
   estadoEsperadoPorCp = '';
 
@@ -283,6 +306,22 @@ export class RegistroEmpresaComponent implements OnInit {
       this.actualizarColoniasPorCp(String(cp ?? ''));
     });
 
+    [
+      'calle',
+      'numeroExterior',
+      'colonia',
+      'municipio',
+      'estado',
+      'codigoPostal',
+      'pais'
+    ].forEach(campo => {
+      this.form.get(campo)?.valueChanges.subscribe(() => {
+        if (!this.blockFieldDrivenGeocode) {
+          this.programarGeocodificacionDesdeCampos();
+        }
+      });
+    });
+
     this.actualizarMunicipios(String(this.form.get('estado')?.value ?? ''));
   }
 
@@ -290,6 +329,19 @@ export class RegistroEmpresaComponent implements OnInit {
     this.coloniasPorCp = CP_COLONIAS_POR_CP;
     this.estadoPorCp = CP_ESTADO_POR_CP;
     this.actualizarColoniasPorCp(String(this.form.get('codigoPostal')?.value ?? ''));
+  }
+
+  ngAfterViewInit(): void {
+    this.inicializarMapa();
+  }
+
+  ngOnDestroy(): void {
+    if (this.geocodeTimer) {
+      clearTimeout(this.geocodeTimer);
+    }
+    if (this.map) {
+      this.map.remove();
+    }
   }
 
   get f() { return this.form.controls; }
@@ -336,6 +388,154 @@ export class RegistroEmpresaComponent implements OnInit {
     if (coloniaActual && this.coloniasDisponibles.length > 0 && !this.coloniasDisponibles.includes(coloniaActual)) {
       this.form.patchValue({ colonia: '' }, { emitEvent: false });
     }
+  }
+
+  private inicializarMapa(): void {
+    if (!this.mapContainerRef || this.mapReady) {
+      return;
+    }
+
+    this.map = L.map(this.mapContainerRef.nativeElement, {
+      zoomControl: true
+    }).setView(this.initialCoords, 5);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(this.map);
+
+    this.marker = L.circleMarker(this.initialCoords, {
+      radius: 8,
+      color: '#0d6efd',
+      fillColor: '#0d6efd',
+      fillOpacity: 0.65,
+      weight: 2
+    }).addTo(this.map);
+
+    this.map.on('click', (e: L.LeafletMouseEvent) => {
+      const lat = Number(e.latlng.lat.toFixed(6));
+      const lng = Number(e.latlng.lng.toFixed(6));
+      this.moverMarcador(lat, lng, true);
+      this.reverseGeocode(lat, lng);
+    });
+
+    this.mapReady = true;
+    this.programarGeocodificacionDesdeCampos();
+  }
+
+  private moverMarcador(lat: number, lng: number, centrar: boolean): void {
+    if (!this.map || !this.marker) {
+      return;
+    }
+
+    this.marker.setLatLng([lat, lng]);
+    if (centrar) {
+      this.map.setView([lat, lng], Math.max(this.map.getZoom(), 16));
+    }
+  }
+
+  private programarGeocodificacionDesdeCampos(): void {
+    if (!this.mapReady) {
+      return;
+    }
+
+    const texto = this.construirDireccionLibre();
+    if (texto.length < 8) {
+      return;
+    }
+
+    if (this.geocodeTimer) {
+      clearTimeout(this.geocodeTimer);
+    }
+
+    this.geocodeTimer = setTimeout(() => {
+      this.geocodificarDireccion(texto);
+    }, 700);
+  }
+
+  private construirDireccionLibre(): string {
+    const calle = String(this.form.get('calle')?.value || '').trim();
+    const numeroExterior = String(this.form.get('numeroExterior')?.value || '').trim();
+    const colonia = String(this.form.get('colonia')?.value || '').trim();
+    const municipio = String(this.form.get('municipio')?.value || '').trim();
+    const estado = String(this.form.get('estado')?.value || '').trim();
+    const codigoPostal = String(this.form.get('codigoPostal')?.value || '').trim();
+    const pais = String(this.form.get('pais')?.value || '').trim() || 'Mexico';
+
+    return [
+      `${calle} ${numeroExterior}`.trim(),
+      colonia,
+      municipio,
+      estado,
+      codigoPostal,
+      pais
+    ].filter(Boolean).join(', ');
+  }
+
+  private geocodificarDireccion(query: string): void {
+    this.http.get<any[]>('https://nominatim.openstreetmap.org/search', {
+      params: {
+        q: query,
+        format: 'jsonv2',
+        addressdetails: '1',
+        countrycodes: 'mx',
+        limit: '1'
+      }
+    }).subscribe({
+      next: res => {
+        if (!Array.isArray(res) || res.length === 0) {
+          return;
+        }
+
+        const first = res[0];
+        const lat = Number(first?.lat);
+        const lng = Number(first?.lon);
+        if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+          return;
+        }
+
+        this.moverMarcador(lat, lng, true);
+      }
+    });
+  }
+
+  private reverseGeocode(lat: number, lng: number): void {
+    this.http.get<any>('https://nominatim.openstreetmap.org/reverse', {
+      params: {
+        lat: String(lat),
+        lon: String(lng),
+        format: 'jsonv2',
+        addressdetails: '1'
+      }
+    }).subscribe({
+      next: res => {
+        const address = res?.address || {};
+        const patch: Record<string, string> = {};
+
+        const road = String(address.road || '').trim();
+        const houseNumber = String(address.house_number || '').trim();
+        const suburb = String(address.suburb || address.neighbourhood || '').trim();
+        const city = String(address.city || address.town || address.village || address.municipality || '').trim();
+        const state = String(address.state || '').trim();
+        const postcode = String(address.postcode || '').trim();
+        const country = String(address.country || 'Mexico').trim();
+
+        if (road) patch['calle'] = road;
+        if (houseNumber) patch['numeroExterior'] = houseNumber;
+        if (suburb) patch['colonia'] = suburb;
+        if (city) patch['municipio'] = city;
+        if (state) patch['estado'] = state;
+        if (postcode) patch['codigoPostal'] = postcode.replace(/\D/g, '').slice(0, 5);
+        if (country) patch['pais'] = country;
+
+        this.blockFieldDrivenGeocode = true;
+        this.form.patchValue(patch);
+        this.blockFieldDrivenGeocode = false;
+
+        this.actualizarMunicipios(String(this.form.get('estado')?.value ?? ''));
+        this.actualizarColoniasPorCp(String(this.form.get('codigoPostal')?.value ?? ''));
+      }
+    });
   }
 
   onSubmit(): void {
@@ -390,5 +590,9 @@ export class RegistroEmpresaComponent implements OnInit {
         this.subiendoLogo = false;
       }
     });
+  }
+
+  onMapaBuscarDesdeCampos(): void {
+    this.programarGeocodificacionDesdeCampos();
   }
 }
