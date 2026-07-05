@@ -134,16 +134,17 @@ const ALCALDIAS_CDMX: string[] = [
             </select>
           </div>
           <div class="col-md-4">
-            <label class="form-label">{{ municipioLabel }}</label>
+            <label class="form-label">{{ municipioLabel }} <span class="text-danger">*</span></label>
             <ng-container *ngIf="municipiosDisponibles.length > 0; else municipioLibre">
-              <select class="form-select" formControlName="municipio">
+              <select class="form-select" formControlName="municipio" [class.is-invalid]="f['municipio'].invalid && submitted">
                 <option value="">Selecciona {{ municipioLabel.toLowerCase() }}</option>
                 <option *ngFor="let municipioItem of municipiosDisponibles" [value]="municipioItem">{{ municipioItem }}</option>
               </select>
             </ng-container>
             <ng-template #municipioLibre>
-              <input type="text" class="form-control" formControlName="municipio" [placeholder]="municipioLabel + ' (captura manual)'">
+              <input type="text" class="form-control" formControlName="municipio" [class.is-invalid]="f['municipio'].invalid && submitted" [placeholder]="municipioLabel + ' (captura manual)'">
             </ng-template>
+            <div class="text-danger small" *ngIf="f['municipio'].invalid && submitted">{{ municipioLabel }} es obligatorio</div>
           </div>
           <div class="col-md-4">
             <label class="form-label">Código postal</label>
@@ -154,18 +155,19 @@ const ALCALDIAS_CDMX: string[] = [
             </div>
           </div>
           <div class="col-md-6">
-            <label class="form-label">Colonia</label>
+            <label class="form-label">Colonia <span class="text-danger">*</span></label>
             <ng-container *ngIf="coloniasDisponibles.length > 0; else coloniaLibre">
-              <select class="form-select" formControlName="colonia">
+              <select class="form-select" formControlName="colonia" [class.is-invalid]="f['colonia'].invalid && submitted">
                 <option value="">Selecciona colonia</option>
                 <option *ngFor="let coloniaItem of coloniasDisponibles" [value]="coloniaItem">{{ coloniaItem }}</option>
               </select>
               <div class="form-text">Colonias sugeridas según el código postal.</div>
             </ng-container>
             <ng-template #coloniaLibre>
-              <input type="text" class="form-control" formControlName="colonia" placeholder="Colonia (captura manual)">
+              <input type="text" class="form-control" formControlName="colonia" [class.is-invalid]="f['colonia'].invalid && submitted" placeholder="Colonia (captura manual)">
               <div class="form-text">Si no aparece una lista, captura la colonia manualmente.</div>
             </ng-template>
+            <div class="text-danger small" *ngIf="f['colonia'].invalid && submitted">Colonia es obligatoria</div>
           </div>
           <div class="col-md-6">
             <label class="form-label">País</label>
@@ -286,8 +288,8 @@ export class RegistroEmpresaComponent implements OnInit, AfterViewInit, OnDestro
       calle:            [''],
       numeroExterior:   [''],
       numeroInterior:   [''],
-      colonia:          [''],
-      municipio:        [''],
+      colonia:          ['', Validators.required],
+      municipio:        ['', Validators.required],
       estado:           [''],
       pais:             ['México'],
       codigoPostal:     ['', [Validators.maxLength(5), Validators.pattern(/^$|^\d{5}$/)]],
@@ -519,25 +521,37 @@ export class RegistroEmpresaComponent implements OnInit, AfterViewInit, OnDestro
         const stateRaw = String(address.state || '').trim();
         const postcode = String(address.postcode || '').trim();
 
+        // Rellenar solo si hay datos
         if (road) patch['calle'] = road;
         if (houseNumber) patch['numeroExterior'] = houseNumber;
         if (suburb) patch['colonia'] = suburb;
         if (city) patch['municipio'] = city;
         patch['pais'] = 'Mexico';
 
-        // Normalizar código postal
+        // Normalizar código postal - PRIORITARIO
         const cpNormalizado = postcode.replace(/\D/g, '').slice(0, 5);
         if (cpNormalizado.length === 5) {
           patch['codigoPostal'] = cpNormalizado;
-          // Usar CP para determinar estado si está en nuestro catálogo
+          
+          // Usar CP para determinar estado - es la fuente de verdad
           const estadoPorCp = this.estadoPorCp[cpNormalizado];
           if (estadoPorCp) {
             patch['estado'] = estadoPorCp;
+            // Si encontramos el estado por CP, también intentar asignar municipio por defecto
+            const municipios = MUNICIPIOS_POR_ESTADO[estadoPorCp];
+            if (municipios && municipios.length > 0 && !patch['municipio']) {
+              // Si no hay municipio de Nominatim, asignar el primero de la lista como sugerencia
+              patch['municipio'] = municipios[0];
+            }
           } else if (stateRaw) {
             // Si no, intentar mapear el estado de Nominatim a nuestro catálogo
             const estadoMapeado = this.mapearEstado(stateRaw);
             if (estadoMapeado) {
               patch['estado'] = estadoMapeado;
+              const municipios = MUNICIPIOS_POR_ESTADO[estadoMapeado];
+              if (municipios && municipios.length > 0 && !patch['municipio']) {
+                patch['municipio'] = municipios[0];
+              }
             }
           }
         } else if (stateRaw) {
@@ -552,8 +566,15 @@ export class RegistroEmpresaComponent implements OnInit, AfterViewInit, OnDestro
         this.blockFieldDrivenGeocode = false;
 
         // Actualizar catálogos dependientes después de llenar estado y CP
-        this.actualizarMunicipios(String(this.form.get('estado')?.value ?? ''));
-        this.actualizarColoniasPorCp(String(this.form.get('codigoPostal')?.value ?? ''));
+        const estadoActual = String(this.form.get('estado')?.value ?? '');
+        const cpActual = String(this.form.get('codigoPostal')?.value ?? '');
+        
+        if (estadoActual) {
+          this.actualizarMunicipios(estadoActual);
+        }
+        if (cpActual) {
+          this.actualizarColoniasPorCp(cpActual);
+        }
       }
     });
   }

@@ -195,19 +195,41 @@ import { EmpresaAdminService } from '../../services/empresa-admin.service';
     .sidebar {
       width: 240px;
       min-width: 240px;
+      max-width: 240px;
       transition: width .22s ease, min-width .22s ease;
       position: relative;
       z-index: 5;
       background: var(--brand-secondary) !important;
       height: 100vh;
+      display: flex;
+      flex-direction: column;
       overflow: hidden;
     }
 
     .sidebar .nav {
       min-height: 0;
+      max-height: calc(100vh - 110px);
       overflow-y: auto;
       overflow-x: hidden;
       scrollbar-width: thin;
+      scroll-behavior: smooth;
+    }
+
+    .sidebar .nav::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .sidebar .nav::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .sidebar .nav::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+    }
+
+    .sidebar .nav::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.4);
     }
 
     .brand-logo {
