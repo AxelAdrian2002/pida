@@ -169,7 +169,7 @@ const ALCALDIAS_CDMX: string[] = [
           </div>
           <div class="col-md-6">
             <label class="form-label">País</label>
-            <input type="text" class="form-control" formControlName="pais" placeholder="México">
+            <input type="text" class="form-control" formControlName="pais" placeholder="México" readonly>
           </div>
           <div class="col-md-6">
             <label class="form-label">Calle</label>
@@ -516,26 +516,74 @@ export class RegistroEmpresaComponent implements OnInit, AfterViewInit, OnDestro
         const houseNumber = String(address.house_number || '').trim();
         const suburb = String(address.suburb || address.neighbourhood || '').trim();
         const city = String(address.city || address.town || address.village || address.municipality || '').trim();
-        const state = String(address.state || '').trim();
+        const stateRaw = String(address.state || '').trim();
         const postcode = String(address.postcode || '').trim();
-        const country = String(address.country || 'Mexico').trim();
 
         if (road) patch['calle'] = road;
         if (houseNumber) patch['numeroExterior'] = houseNumber;
         if (suburb) patch['colonia'] = suburb;
         if (city) patch['municipio'] = city;
-        if (state) patch['estado'] = state;
-        if (postcode) patch['codigoPostal'] = postcode.replace(/\D/g, '').slice(0, 5);
-        if (country) patch['pais'] = country;
+        patch['pais'] = 'Mexico';
+
+        // Normalizar código postal
+        const cpNormalizado = postcode.replace(/\D/g, '').slice(0, 5);
+        if (cpNormalizado.length === 5) {
+          patch['codigoPostal'] = cpNormalizado;
+          // Usar CP para determinar estado si está en nuestro catálogo
+          const estadoPorCp = this.estadoPorCp[cpNormalizado];
+          if (estadoPorCp) {
+            patch['estado'] = estadoPorCp;
+          } else if (stateRaw) {
+            // Si no, intentar mapear el estado de Nominatim a nuestro catálogo
+            const estadoMapeado = this.mapearEstado(stateRaw);
+            if (estadoMapeado) {
+              patch['estado'] = estadoMapeado;
+            }
+          }
+        } else if (stateRaw) {
+          const estadoMapeado = this.mapearEstado(stateRaw);
+          if (estadoMapeado) {
+            patch['estado'] = estadoMapeado;
+          }
+        }
 
         this.blockFieldDrivenGeocode = true;
         this.form.patchValue(patch);
         this.blockFieldDrivenGeocode = false;
 
+        // Actualizar catálogos dependientes después de llenar estado y CP
         this.actualizarMunicipios(String(this.form.get('estado')?.value ?? ''));
         this.actualizarColoniasPorCp(String(this.form.get('codigoPostal')?.value ?? ''));
       }
     });
+  }
+
+  private mapearEstado(stateRaw: string): string | null {
+    const stateUpper = stateRaw.toUpperCase();
+    // Buscar en ESTADOS_MX un match por nombre o abreviatura
+    for (const estado of ESTADOS_MX) {
+      if (estado.toUpperCase() === stateUpper) {
+        return estado;
+      }
+    }
+    // Intentar con abreviaturas comunes
+    const abreviaturas: Record<string, string> = {
+      'MEX': 'Estado de Mexico',
+      'CDMX': 'Ciudad de Mexico',
+      'DF': 'Ciudad de Mexico',
+      'QRO': 'Queretaro',
+      'SLP': 'San Luis Potosi',
+      'VER': 'Veracruz',
+      'BC': 'Baja California',
+      'BCS': 'Baja California Sur',
+      'JAL': 'Jalisco',
+      'GTO': 'Guanajuato',
+      'PUE': 'Puebla',
+      'OAX': 'Oaxaca',
+      'MOR': 'Morelos',
+      'TAMPS': 'Tamaulipas'
+    };
+    return abreviaturas[stateUpper] || null;
   }
 
   onSubmit(): void {
